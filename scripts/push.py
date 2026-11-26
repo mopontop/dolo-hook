@@ -23,7 +23,13 @@ TARGETS = ["README.md", "loadstring.lua"]
 
 
 def run(args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(args, cwd=ROOT, text=True, check=check)
+    return subprocess.run(
+        args,
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=check,
+    )
 
 
 def rewrite(username: str) -> int:
