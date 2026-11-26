@@ -5,6 +5,8 @@ title OJB Test Hub - push
 rem Repo root is this file's directory.
 cd /d "%~dp0"
 set "EXITCODE=0"
+set "GH_USER="
+set "ARGS="
 
 if not "%~1"=="" (
     set "ARGS=%*"
@@ -12,11 +14,11 @@ if not "%~1"=="" (
     echo.
     echo Create the empty repo first: https://github.com/new  ^(name: ojb-test-hub, no README^)
     echo.
-    set /p "USERNAME=GitHub username: "
-    set "ARGS=%USERNAME%"
+    set /p "GH_USER=GitHub username: "
+    if defined GH_USER set "ARGS=%GH_USER%"
 )
 
-if "%ARGS%"=="" (
+if not defined ARGS (
     echo No username given - nothing to do.
     goto :done
 )

@@ -90,4 +90,12 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\ncancelled")
+        sys.exit(130)
+    except Exception as exc:  # noqa: BLE001 - surface one readable line, not a traceback
+        print(f"\npush helper hit a wall: {exc}")
+        print("run `git push -u origin main` by hand to see the raw git error")
+        sys.exit(1)
