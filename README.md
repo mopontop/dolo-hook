@@ -93,11 +93,14 @@ anything with `loadstring`, `HttpGet`, `writefile`).
 
 ## Notes
 
-- **Front-end: Linoria.** `src/ui.lua` fetches `LinoriaLib/Library.lua` from
-  [`wally-rblx/LinoriaLib`](https://github.com/wally-rblx/LinoriaLib) — that is
-  the canonical copy; the `Eazvy/UILibs` Linoria folder ships only the example
-  and the README, and its example loader points at the same wally-rblx path.
-  Tabs are Main / Visuals / Teleport / Config, built from left/right groupboxes.
+- **Front-end: Linoria.** `src/ui.lua` fetches `Library.lua` from the first live
+  mirror that answers — [`violin-suzutsuki/LinoriaLib`](https://github.com/violin-suzutsuki/LinoriaLib)
+  then [`stratxgy/Linora-Lib`](https://github.com/stratxgy/Linora-Lib). The
+  original `wally-rblx/LinoriaLib` that the Eazvy example points at is **gone
+  (404)**, which is why that URL is not used. Each candidate is checked for an
+  HTML/404 body before compiling, so a dead mirror reports "server returned an
+  HTML/404 page" instead of a cryptic syntax error. Tabs: Main / Visuals /
+  Teleport / Config, built from left/right groupboxes.
 - **Fallback: bundled window.** `src/interface.lua` is a self-contained widget
   set (draggable frame, tabs, sections, toggle, slider, button, input, dropdown,
   colour swatches, toasts) written against the same call surface. If the Linoria

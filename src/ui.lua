@@ -9,7 +9,12 @@ local Misc = __require("features/misc")
 
 local UI = { backend = "none" }
 
-local LINORIA_REPO = "https://raw.githubusercontent.com/wally-rblx/LinoriaLib/main/"
+-- wally-rblx/LinoriaLib is gone (404). These are live mirrors of the same
+-- library; tried in order until one yields a compiling library.
+local LINORIA_SOURCES = {
+	"https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua",
+	"https://raw.githubusercontent.com/stratxgy/Linora-Lib/main/Library.lua",
+}
 
 local Library
 local Options
@@ -34,17 +39,55 @@ local function report(ok, message, okText)
 	return ok
 end
 
+-- A 404 returns an HTML page, which loadstring then fails on with a message
+-- that hides the real cause. Check the body before handing it to the compiler.
+local function looksLikeLibrary(source)
+	if type(source) ~= "string" then
+		return false, "response was not a string"
+	end
+	if #source < 5000 then
+		return false, ("response too short: %d bytes"):format(#source)
+	end
+	local head = source:sub(1, 256)
+	if head:find("<!DOCTYPE") or head:find("<html") or head:find("404: Not Found") then
+		return false, "server returned an HTML/404 page"
+	end
+	return true
+end
+
 local function loadLibrary()
-	local source = game:HttpGet(LINORIA_REPO .. "Library.lua")
-	local chunk = loadstring(source)
-	if type(chunk) ~= "function" then
-		error("LinoriaLib/Library.lua did not compile")
+	local reasons = {}
+
+	for _, url in ipairs(LINORIA_SOURCES) do
+		local fetched, source = pcall(function()
+			return game:HttpGet(url)
+		end)
+
+		if not fetched then
+			reasons[#reasons + 1] = ("fetch failed (%s)"):format(tostring(source))
+			continue
+		end
+
+		local valid, why = looksLikeLibrary(source)
+		if not valid then
+			reasons[#reasons + 1] = ("%s: %s"):format(url:match("[^/]+/[^/]+/main"), why)
+			continue
+		end
+
+		local compiled, chunk = pcall(loadstring, source)
+		if not compiled or type(chunk) ~= "function" then
+			reasons[#reasons + 1] = ("%s: compile failed (%s)"):format(url:match("[^/]+/[^/]+/main"), tostring(chunk))
+			continue
+		end
+
+		local ran, library = pcall(chunk)
+		if ran and type(library) == "table" and type(library.CreateWindow) == "function" then
+			return library
+		end
+		reasons[#reasons + 1] = ("%s: load failed (%s)"):format(url:match("[^/]+/[^/]+/main"), tostring(library))
 	end
-	local library = chunk()
-	if type(library) ~= "table" or type(library.CreateWindow) ~= "function" then
-		error("Linoria returned an unexpected library shape")
-	end
-	return library
+
+	error("no working Linoria source: " .. table.concat(reasons, "; "))
 end
 
 local function buildLinoria()
@@ -313,6 +356,14 @@ local function buildLinoria()
 
 	Library.ToggleKeybind = Options and Options.MenuKeybind
 
+	-- Visible proof of which front-end is running.
+	if type(Library.SetWatermark) == "function" then
+		pcall(function()
+			Library:SetWatermark("OJB Test Hub — Linoria")
+			Library:SetWatermarkVisibility(true)
+		end)
+	end
+
 	Library:OnUnload(function()
 		pcall(function()
 			Player.destroy()
@@ -374,7 +425,9 @@ function UI.build()
 		error(fallbackError)
 	end
 
-	notify("Linoria unavailable (" .. tostring(err) .. ") — using bundled window")
+	-- Never let the substitute pass for the real thing silently.
+	Util.showError("Linoria unavailable — bundled window in use", tostring(err))
+	notify("Linoria unavailable — bundled window in use")
 end
 
 function UI.destroy()
