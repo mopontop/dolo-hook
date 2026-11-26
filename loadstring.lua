@@ -1,8 +1,8 @@
 -- OJB Test Hub — executor entry line.
--- Replace YOUR_GITHUB_USER (and the branch, if not main) after you push the repo.
--- Raw URL must point at the release file, not at src/.
+-- Owner: mopontop. Branch: main. Raw URL must point at the release file, not src/.
+-- Repo moved? Run scripts/push.py to rewrite this owner.
 
-local REPO = "https://raw.githubusercontent.com/YOUR_GITHUB_USER/ojb-test-hub/main/release/ojb-test-hub.lua"
+local REPO = "https://raw.githubusercontent.com/mopontop/ojb-test-hub/main/release/ojb-test-hub.lua"
 
 local source = game:HttpGet(REPO)
 local chunk = loadstring(source)

@@ -8,11 +8,12 @@ The release artifact is a single Luau file, so the executor only ever fetches
 one URL.
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/YOUR_GITHUB_USER/ojb-test-hub/main/release/ojb-test-hub.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/mopontop/ojb-test-hub/main/release/ojb-test-hub.lua"))()
 ```
 
-Swap `YOUR_GITHUB_USER` for the account you push to. The raw URL must point at
-`release/`, never at `src/` — `src/` is modules, not a chunk.
+Owned by `mopontop`. The raw URL must point at `release/`, never at `src/` —
+`src/` is modules, not a chunk. Moving the repo to another account means
+changing the owner in `loadstring.lua` and here (`scripts/push.py` does both).
 
 ## What's in the window
 
@@ -79,17 +80,16 @@ tears down the previous instance instead of stacking a second window.
 
 ## Pushing it
 
+Already initialized and committed — only the remote is missing:
+
 ```bash
-git init -b main
-git add .
-git commit -m "test hub: loadstring, rayfield ui, features"
-git remote add origin https://github.com/YOUR_GITHUB_USER/ojb-test-hub.git
+git remote add origin https://github.com/mopontop/ojb-test-hub.git
 git push -u origin main
 ```
 
-Then edit `YOUR_GITHUB_USER` in `loadstring.lua` and README, and run the line in
-an executor (Delta, Wave, Solara, AWP — anything with `loadstring`, `HttpGet`,
-`writefile`).
+Or just run `PUSH.bat` — it wires the remote, pushes, and prints the loadstring
+line above. Then paste that line into an executor (Delta, Wave, Solara, AWP —
+anything with `loadstring`, `HttpGet`, `writefile`).
 
 ## Notes
 
