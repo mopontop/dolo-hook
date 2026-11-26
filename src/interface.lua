@@ -648,8 +648,32 @@ function Interface:CreateWindow(config)
 		Parent = topbar,
 	})
 	corner(close, 6)
+
+	-- Closing hides the window but leaves a handle: on mobile there is no K key.
+	local reopen = create("TextButton", {
+		Size = UDim2.fromOffset(52, 36),
+		Position = UDim2.new(0, 12, 0, 12),
+		BackgroundColor3 = THEME.panel,
+		BorderSizePixel = 0,
+		Font = FONT_BOLD,
+		TextSize = 13,
+		TextColor3 = THEME.accent,
+		Text = "OJB",
+		Visible = false,
+		Parent = root,
+	})
+	corner(reopen, 8)
+
+	local function setVisible(visible)
+		frame.Visible = visible
+		reopen.Visible = not visible
+	end
+
 	close.MouseButton1Click:Connect(function()
-		root.Enabled = false
+		setVisible(false)
+	end)
+	reopen.MouseButton1Click:Connect(function()
+		setVisible(true)
 	end)
 
 	local rail = create("Frame", {
@@ -724,6 +748,11 @@ function Interface:CreateWindow(config)
 		local tab = { page = page, button = button }
 		tabs[#tabs + 1] = tab
 
+		-- First tab created becomes the visible one; CreateWindow runs before any exist.
+		if not activeTab then
+			selectTab(tab)
+		end
+
 		button.MouseButton1Click:Connect(function()
 			selectTab(tab)
 		end)
@@ -764,7 +793,7 @@ function Interface:CreateWindow(config)
 	end
 
 	function window:Toggle()
-		root.Enabled = not root.Enabled
+		setVisible(not frame.Visible)
 	end
 
 	-- drag

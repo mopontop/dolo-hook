@@ -95,6 +95,23 @@ def check(path: Path) -> list[str]:
         problems.append(f"{path.name}: {openers} block openers vs {closers} end (delta {openers - closers:+d})")
     if repeats != untils:
         problems.append(f"{path.name}: {repeats} repeat vs {untils} until")
+
+    for pair in ("()", "{}", "[]"):
+        opened = stripped.count(pair[0])
+        closed = stripped.count(pair[1])
+        if opened != closed:
+            problems.append(f"{path.name}: unbalanced {pair[0]}{pair[1]} ({opened} vs {closed})")
+
+    # `if`/`elseif` must reach a `then` before the next statement keyword.
+    for match in re.finditer(r"\b(?:if|elseif)\b", stripped):
+        tail = stripped[match.end() : match.end() + 400]
+        stop = re.search(r"\b(?:do|end|function|return|local)\b", tail)
+        window = tail if stop is None else tail[: stop.start()]
+        if "\nthen" not in window and not window.strip().startswith("then"):
+            if "then" not in window:
+                line = text.count("\n", 0, match.start()) + 1
+                problems.append(f"{path.name}:{line}: if/elseif without then")
+
     return problems
 
 
