@@ -1,17 +1,38 @@
 @echo off
-setlocal
-cd /d "%~dp0.."
+setlocal EnableExtensions
+title OJB Test Hub - push
 
-if "%~1"=="" (
-	echo usage: PUSH.bat ^<github-username^>
-	echo.
-	echo   1. create an empty repo named ojb-test-hub at https://github.com/new
-	echo   2. run: PUSH.bat your-username
-	exit /b 2
+rem Repo root is this file's directory.
+cd /d "%~dp0"
+set "EXITCODE=0"
+
+if not "%~1"=="" (
+    set "ARGS=%*"
+) else (
+    echo.
+    echo Create the empty repo first: https://github.com/new  ^(name: ojb-test-hub, no README^)
+    echo.
+    set /p "USERNAME=GitHub username: "
+    set "ARGS=%USERNAME%"
 )
 
-python scripts\push.py %*
-set EXITCODE=%ERRORLEVEL%
+if "%ARGS%"=="" (
+    echo No username given - nothing to do.
+    goto :done
+)
+
+where python >nul 2>nul
+if errorlevel 1 (
+    echo.
+    echo python is not on PATH. Install it, or run this from a terminal:
+    echo     python scripts\push.py your-username
+    goto :done
+)
+
+python "%~dp0scripts\push.py" %ARGS%
+set "EXITCODE=%ERRORLEVEL%"
+
+:done
 echo.
 pause
 exit /b %EXITCODE%
