@@ -19,6 +19,7 @@ local function main()
 	local ok, err = pcall(UI.build)
 	if not ok then
 		Util.notify("OJB Test Hub", "failed to build UI: " .. tostring(err))
+		Util.showError("OJB Test Hub — UI failed to build", err)
 		error(err)
 	end
 

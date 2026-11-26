@@ -387,11 +387,13 @@ function UI.build()
 		DisableRayfieldPrompts = true,
 	})
 
-	buildPlayerTab(Rayfield, window:CreateTab("Player", "user"))
-	buildVisualsTab(Rayfield, window:CreateTab("Visuals", "eye"))
-	buildTeleportTab(Rayfield, window:CreateTab("Teleport", "map-pin"))
-	buildMiscTab(Rayfield, window:CreateTab("Misc", "wrench"))
-	buildConfigTab(Rayfield, window:CreateTab("Config", "save"))
+	-- No icon strings: Rayfield's Lucide set is a compiled subset, and an
+	-- unknown name aborts the whole build. Plain text tabs always work.
+	buildPlayerTab(Rayfield, window:CreateTab("Player"))
+	buildVisualsTab(Rayfield, window:CreateTab("Visuals"))
+	buildTeleportTab(Rayfield, window:CreateTab("Teleport"))
+	buildMiscTab(Rayfield, window:CreateTab("Misc"))
+	buildConfigTab(Rayfield, window:CreateTab("Config"))
 
 	UI.sync()
 	notify("OJB Test Hub", "loaded — press K to toggle")
