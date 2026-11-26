@@ -375,9 +375,9 @@ function UI.build()
 	end)
 
 	window = Rayfield:CreateWindow({
-		Name = "OJB Test Hub",
+		Name = "Dolo.Hook",
 		Icon = 0,
-		LoadingTitle = "OJB Test Hub",
+		LoadingTitle = "Dolo.Hook",
 		LoadingSubtitle = "loadstring test build",
 		Theme = "Default",
 		ToggleUIKeybind = "K",
@@ -393,7 +393,7 @@ function UI.build()
 	buildConfigTab(Rayfield, window:CreateTab("Config"))
 
 	UI.sync()
-	notify("OJB Test Hub", "loaded — press K to toggle")
+	notify("Dolo.Hook", "loaded — press K to toggle")
 	return window
 end
 
@@ -411,7 +411,7 @@ function UI.destroy()
 	end
 	elements = {}
 	loaded = false
-	Util.notify("OJB Test Hub", "unloaded")
+	Util.notify("Dolo.Hook", "unloaded")
 end
 
 return UI

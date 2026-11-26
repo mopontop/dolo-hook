@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REPO_NAME = "ojb-test-hub"
+REPO_NAME = "dolo-hook"
 PLACEHOLDER = "YOUR_GITHUB_USER"
 
 TARGETS = ["README.md", "loadstring.lua"]
@@ -64,7 +64,7 @@ def main() -> int:
 
     load_line = (
         'loadstring(game:HttpGet("https://raw.githubusercontent.com/'
-        f'{username}/{REPO_NAME}/main/release/ojb-test-hub.lua"))()'
+        f'{username}/{REPO_NAME}/main/release/dolo-hook.lua"))()'
     )
 
     if args.dry_run:

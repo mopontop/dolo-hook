@@ -589,7 +589,7 @@ function Interface:CreateWindow(config)
 	local parent = guiParent()
 
 	local root = create("ScreenGui", {
-		Name = "OJB_TestHub",
+		Name = "DoloHook",
 		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
 		DisplayOrder = 10,
@@ -631,7 +631,7 @@ function Interface:CreateWindow(config)
 		Position = UDim2.new(0, 14, 0, 0),
 		Font = FONT_BOLD,
 		TextSize = 14,
-		Text = config.Name or "OJB Test Hub",
+		Text = config.Name or "Dolo.Hook",
 		Parent = topbar,
 	})
 
@@ -658,7 +658,7 @@ function Interface:CreateWindow(config)
 		Font = FONT_BOLD,
 		TextSize = 13,
 		TextColor3 = THEME.accent,
-		Text = "OJB",
+		Text = "Dolo",
 		Visible = false,
 		Parent = root,
 	})

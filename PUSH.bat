@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-title OJB Test Hub - push
+title Dolo.Hook - push
 
 rem Repo root is this file's directory.
 cd /d "%~dp0"
@@ -10,7 +10,7 @@ set "ARGS="
 if not "%~1"=="" goto have_args
 
 echo.
-echo Create the empty repo first: https://github.com/new  ^(name: ojb-test-hub, no README^)
+echo Create the empty repo first: https://github.com/new  ^(name: dolo-hook, no README^)
 echo.
 set "GH_USER="
 set /p "GH_USER=GitHub username: "

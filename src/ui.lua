@@ -28,7 +28,7 @@ local function notify(text, duration)
 		end)
 		return
 	end
-	Util.notify("OJB Test Hub", text)
+	Util.notify("Dolo.Hook", text)
 end
 
 local function report(ok, message, okText)
@@ -96,7 +96,7 @@ local function buildLinoria()
 	Options = (getgenv and getgenv().Options) or Options
 
 	local window = Library:CreateWindow({
-		Title = "OJB Test Hub",
+		Title = "Dolo.Hook",
 		Center = true,
 		AutoShow = true,
 	})
@@ -360,7 +360,7 @@ local function buildLinoria()
 	-- Visible proof of which front-end is running.
 	if type(Library.SetWatermark) == "function" then
 		pcall(function()
-			Library:SetWatermark("OJB Test Hub — Linoria")
+			Library:SetWatermark("Dolo.Hook — Linoria")
 			Library:SetWatermarkVisibility(true)
 		end)
 	end
@@ -375,7 +375,7 @@ local function buildLinoria()
 
 	UI.backend = "linoria"
 	UI.sync()
-	notify("OJB Test Hub loaded — Linoria")
+	notify("Dolo.Hook loaded — Linoria")
 end
 
 function UI.sync()
@@ -420,7 +420,7 @@ function UI.build()
 	local built, fallbackError = pcall(fallback.build)
 	if not built then
 		Util.showError(
-			"OJB Test Hub — no window could be built",
+			"Dolo.Hook — no window could be built",
 			("linoria: %s\nfallback: %s"):format(tostring(err), tostring(fallbackError))
 		)
 		error(fallbackError)
@@ -448,7 +448,7 @@ function UI.destroy()
 		Misc.destroy()
 	end)
 	UI.backend = "none"
-	Util.notify("OJB Test Hub", "unloaded")
+	Util.notify("Dolo.Hook", "unloaded")
 end
 
 return UI

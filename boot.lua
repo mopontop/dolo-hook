@@ -2,12 +2,12 @@
 -- Verifies the fetch and the compile, then draws the error on screen instead of
 -- dying in a console nobody is watching.
 
-local REPO = "https://raw.githubusercontent.com/mopontop/ojb-test-hub/main/release/ojb-test-hub.lua"
+local REPO = "https://raw.githubusercontent.com/mopontop/dolo-hook/main/release/dolo-hook.lua"
 
 local function drawError(title, detail)
 	local parent = (gethui and gethui()) or game:GetService("CoreGui")
 	local gui = Instance.new("ScreenGui")
-	gui.Name = "OJB_Error"
+	gui.Name = "DoloHook_Error"
 	gui.ResetOnSpawn = false
 
 	local ok = pcall(function()

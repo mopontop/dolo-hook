@@ -1,7 +1,7 @@
 -- diagnose.lua — paste into the executor. Paints each stage as it finishes, so
 -- a hang can never hide the stages that already succeeded.
 
-local REPORT = "https://raw.githubusercontent.com/mopontop/ojb-test-hub/main/release/ojb-test-hub.lua"
+local REPORT = "https://raw.githubusercontent.com/mopontop/dolo-hook/main/release/dolo-hook.lua"
 
 local lines = {}
 local panel
@@ -16,14 +16,14 @@ end
 
 local function say(line)
 	lines[#lines + 1] = line
-	warn("[OJB diagnose] " .. line)
+	warn("[Dolo.Hook diagnose] " .. line)
 	render()
 end
 
 local function buildPanel()
 	local parent = (gethui and gethui()) or game:GetService("CoreGui")
 	local gui = Instance.new("ScreenGui")
-	gui.Name = "OJB_Diagnose"
+	gui.Name = "DoloHook_Diagnose"
 	gui.ResetOnSpawn = false
 	local ok = pcall(function()
 		gui.Parent = parent

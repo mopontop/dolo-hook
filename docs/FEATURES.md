@@ -21,7 +21,7 @@ text box has focus, which is the behavior you want in a Rayfield window.
 
 `Highlight` per other player, `DepthMode = AlwaysOnTop`, fill transparency 0.55.
 A `Heartbeat` sweep attaches/detaches as players join, leave, respawn or lose
-their character. Instances live under a `OJB_ESP` folder — `CoreGui` first,
+their character. Instances live under a `DoloHook_ESP` folder — `CoreGui` first,
 `CurrentCamera` as fallback.
 
 ## teleport.lua

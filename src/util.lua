@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local Util = {}
 
 local notifier = function(title, content)
-	print(("[OJB] %s — %s"):format(tostring(title), tostring(content)))
+	print(("[Dolo.Hook] %s — %s"):format(tostring(title), tostring(content)))
 end
 
 function Util.setNotifier(fn)
@@ -70,7 +70,7 @@ function Util.showError(title, detail)
 	local parent = (gethui and gethui()) or game:GetService("CoreGui")
 
 	local gui = Instance.new("ScreenGui")
-	gui.Name = "OJB_Error"
+	gui.Name = "DoloHook_Error"
 	gui.ResetOnSpawn = false
 
 	local ok = pcall(function()

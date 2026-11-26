@@ -8,7 +8,7 @@ local VERSION = "0.1.0"
 
 local function main()
 	-- Re-executing the loadstring must replace the running instance, not stack one.
-	local previous = _G.OJB_TestHub
+	local previous = _G.DoloHook
 	if previous and type(previous.destroy) == "function" then
 		pcall(previous.destroy)
 	end
@@ -18,8 +18,8 @@ local function main()
 
 	local ok, err = pcall(UI.build)
 	if not ok then
-		Util.notify("OJB Test Hub", "failed to build UI: " .. tostring(err))
-		Util.showError("OJB Test Hub — UI failed to build", err)
+		Util.notify("Dolo.Hook", "failed to build UI: " .. tostring(err))
+		Util.showError("Dolo.Hook — UI failed to build", err)
 		error(err)
 	end
 
@@ -29,13 +29,13 @@ local function main()
 			UI.destroy()
 			Player.destroy()
 			ESP.destroy()
-			if _G.OJB_TestHub == handle then
-				_G.OJB_TestHub = nil
+			if _G.DoloHook == handle then
+				_G.DoloHook = nil
 			end
 		end,
 	}
 
-	_G.OJB_TestHub = handle
+	_G.DoloHook = handle
 	return handle
 end
 

@@ -18,7 +18,7 @@ local function getContainer()
 	end
 
 	local folder = Instance.new("Folder")
-	folder.Name = "OJB_ESP"
+	folder.Name = "DoloHook_ESP"
 
 	-- CoreGui survives ScreenGui cleanup by the game and is never replicated.
 	local ok = pcall(function()
@@ -56,7 +56,7 @@ local function attach(player)
 	end
 
 	highlight = Instance.new("Highlight")
-	highlight.Name = "OJB_ESP_" .. player.Name
+	highlight.Name = "DoloHook_ESP_" .. player.Name
 	highlight.Adornee = character
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 	highlight.FillColor = fill

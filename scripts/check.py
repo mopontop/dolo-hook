@@ -117,7 +117,7 @@ def check(path: Path) -> list[str]:
 
 def main() -> int:
     targets = sorted((ROOT / "src").rglob("*.lua"))
-    targets.append(ROOT / "release" / "ojb-test-hub.lua")
+    targets.append(ROOT / "release" / "dolo-hook.lua")
     targets.append(ROOT / "loadstring.lua")
 
     failures: list[str] = []

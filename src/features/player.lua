@@ -32,7 +32,7 @@ local function startFlyBody()
 	end
 
 	local body = Instance.new("BodyVelocity")
-	body.Name = "OJB_Fly"
+	body.Name = "DoloHook_Fly"
 	body.MaxForce = Vector3.new(1e5, 1e5, 1e5)
 	body.Velocity = Vector3.zero
 	body.Parent = root

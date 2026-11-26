@@ -3,7 +3,7 @@ local HttpService = game:GetService("HttpService")
 
 local Config = {}
 
-local FOLDER = "OJBS-TestHub"
+local FOLDER = "Dolo.Hook"
 local FILE = FOLDER .. "/settings.json"
 
 -- Color3 and instance references are session-only; only primitives persist.

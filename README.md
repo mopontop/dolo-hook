@@ -1,4 +1,4 @@
-# OJB Test Hub
+# Dolo.Hook
 
 A small, self-contained Roblox test hub: one loadstring, one Rayfield window, a
 handful of client-side features. Built as a test bench for the loader + repo
@@ -8,7 +8,7 @@ The release artifact is a single Luau file, so the executor only ever fetches
 one URL.
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/mopontop/ojb-test-hub/main/release/ojb-test-hub.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/mopontop/dolo-hook/main/release/dolo-hook.lua"))()
 ```
 
 Owned by `mopontop`. The raw URL must point at `release/`, never at `src/` —
@@ -33,7 +33,7 @@ changing the owner in `loadstring.lua` and here (`scripts/push.py` does both).
 | Misc | Rejoin server | `TeleportService:Teleport` |
 | Misc | Test notification | Rayfield notify round-trip |
 | Misc | Destroy UI | unloads features, drops the window |
-| Config | Save / Load | primitives to `OJBS-TestHub/settings.json` via `writefile` |
+| Config | Save / Load | primitives to `Dolo.Hook/settings.json` via `writefile` |
 
 Every toggle is wired to a module function — the UI layer holds no logic beyond
 element → module calls.
@@ -41,11 +41,11 @@ element → module calls.
 ## Repo layout
 
 ```
-ojb-test-hub/
+dolo-hook/
 ├── loadstring.lua            # executor entry point (edit the owner)
-├── release/ojb-test-hub.lua  # generated bundle — this is what gets served
+├── release/dolo-hook.lua  # generated bundle — this is what gets served
 ├── src/
-│   ├── init.lua              # registry bootstrap, _G.OJB_TestHub lifecycle
+│   ├── init.lua              # registry bootstrap, _G.DoloHook lifecycle
 │   ├── util.lua              # player / character / part lookups
 │   ├── config.lua            # defaults, live values, disk persistence
 │   ├── ui.lua                # Rayfield window and every element
@@ -63,7 +63,7 @@ ojb-test-hub/
 ## Build
 
 ```bash
-python scripts/build.py   # writes release/ojb-test-hub.lua
+python scripts/build.py   # writes release/dolo-hook.lua
 python scripts/check.py   # structural check, exits non-zero on imbalance
 ```
 
@@ -75,7 +75,7 @@ util → config → features/player → features/esp
 ```
 
 A module may only `__require` names that come before it. `init` runs last and
-returns the handle stored in `_G.OJB_TestHub`, so re-executing the loadstring
+returns the handle stored in `_G.DoloHook`, so re-executing the loadstring
 tears down the previous instance instead of stacking a second window.
 
 ## Pushing it
@@ -83,7 +83,7 @@ tears down the previous instance instead of stacking a second window.
 Already initialized and committed — only the remote is missing:
 
 ```bash
-git remote add origin https://github.com/mopontop/ojb-test-hub.git
+git remote add origin https://github.com/mopontop/dolo-hook.git
 git push -u origin main
 ```
 
