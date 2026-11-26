@@ -12,6 +12,7 @@ local UI = { backend = "none" }
 -- wally-rblx/LinoriaLib is gone (404). These are live mirrors of the same
 -- library; tried in order until one yields a compiling library.
 local LINORIA_SOURCES = {
+	"https://cdn.jsdelivr.net/gh/violin-suzutsuki/LinoriaLib@main/Library.lua",
 	"https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua",
 	"https://raw.githubusercontent.com/stratxgy/Linora-Lib/main/Library.lua",
 }
