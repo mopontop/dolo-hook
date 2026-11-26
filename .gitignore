@@ -1,0 +1,12 @@
+# python
+__pycache__/
+*.pyc
+
+# editors / os
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# local executor output
+OJBS-TestHub/
