@@ -101,17 +101,6 @@ function ESP.setEnabled(enabled)
 
 	sweep()
 
-	for _, player in ipairs(Players:GetPlayers()) do
-		local character = player.Character
-		if character then
-			character.ChildAdded:Connect(function()
-				if connection then
-					attach(player)
-				end
-			end)
-		end
-	end
-
 	if not connection then
 		connection = RunService.Heartbeat:Connect(function()
 			sweep()
