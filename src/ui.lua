@@ -12,6 +12,11 @@ local World = __require("features/world")
 local HUD = __require("features/hud")
 local Crosshair = __require("features/crosshair")
 local Hitbox = __require("features/hitbox")
+local Triggerbot = __require("features/triggerbot")
+local Weapon = __require("features/weapon")
+local Silent = __require("features/silent")
+local Hitsound = __require("features/hitsound")
+local Ambience = __require("features/ambience")
 
 local UserInputService = game:GetService("UserInputService")
 
@@ -114,6 +119,7 @@ local function buildLinoria()
 		Visuals = window:AddTab("Visuals"),
 		HUD = window:AddTab("HUD"),
 		Movement = window:AddTab("Movement"),
+		Weapon = window:AddTab("Weapon"),
 		World = window:AddTab("World"),
 		Teleport = window:AddTab("Teleport"),
 		Misc = window:AddTab("Misc"),
@@ -235,6 +241,31 @@ local function buildLinoria()
 		end,
 	})
 
+	aimchecks:AddSlider("AimOffsetY", {
+		Text = "Vertical offset",
+		Default = Config.get("AimOffsetY"),
+		Min = -3,
+		Max = 3,
+		Rounding = 2,
+		Suffix = " studs",
+		Callback = function(value)
+			Config.set("AimOffsetY", value)
+		end,
+	})
+
+	aimchecks:AddSlider("AimPredictionAmount", {
+		Text = "Prediction lead",
+		Default = Config.get("AimPredictionAmount"),
+		Min = 0.02,
+		Max = 0.5,
+		Rounding = 2,
+		Suffix = " s",
+		Tooltip = "Only used when velocity prediction is on",
+		Callback = function(value)
+			Config.set("AimPredictionAmount", value)
+		end,
+	})
+
 	local hitboxBox = tabs.Aim:AddLeftGroupbox("Hitbox")
 
 	hitboxBox:AddToggle("Hitbox", {
@@ -256,6 +287,204 @@ local function buildLinoria()
 		Suffix = "x",
 		Callback = function(value)
 			Config.set("HitboxScale", value)
+		end,
+	})
+
+	-- ------------------------------------------------------------- weapon
+	local triggerBox = tabs.Weapon:AddLeftGroupbox("Trigger bot")
+
+	triggerBox:AddToggle("Trigger", {
+		Text = "Trigger bot",
+		Tooltip = "Clicks when a target sits under the crosshair",
+		Default = Config.get("Trigger"),
+		Callback = function(value)
+			Config.set("Trigger", value)
+			Triggerbot.setEnabled(value)
+		end,
+	})
+
+	triggerBox:AddDropdown("TriggerKey", {
+		Text = "Trigger key",
+		Values = { "MB2", "MB1", "E", "Q", "Always" },
+		Default = 1,
+		Multi = false,
+		Callback = function(value)
+			Config.set("TriggerKey", value)
+		end,
+	})
+
+	triggerBox:AddSlider("TriggerFOV", {
+		Text = "Trigger radius",
+		Default = Config.get("TriggerFOV"),
+		Min = 1,
+		Max = 60,
+		Rounding = 0,
+		Suffix = " px",
+		Callback = function(value)
+			Config.set("TriggerFOV", value)
+		end,
+	})
+
+	triggerBox:AddSlider("TriggerDelay", {
+		Text = "Click delay",
+		Default = Config.get("TriggerDelay"),
+		Min = 0.01,
+		Max = 0.5,
+		Rounding = 2,
+		Suffix = " s",
+		Callback = function(value)
+			Config.set("TriggerDelay", value)
+		end,
+	})
+
+	triggerBox:AddToggle("TriggerVisibleOnly", {
+		Text = "Visible only",
+		Default = Config.get("TriggerVisibleOnly"),
+		Callback = function(value)
+			Config.set("TriggerVisibleOnly", value)
+		end,
+	})
+
+	triggerBox:AddToggle("TriggerTeamCheck", {
+		Text = "Team check",
+		Default = Config.get("TriggerTeamCheck"),
+		Callback = function(value)
+			Config.set("TriggerTeamCheck", value)
+		end,
+	})
+
+	local stabiliser = tabs.Weapon:AddRightGroupbox("Recoil / sway")
+
+	stabiliser:AddToggle("NoRecoil", {
+		Text = "No recoil",
+		Tooltip = "Cancels upward camera kick each frame",
+		Default = Config.get("NoRecoil"),
+		Callback = function(value)
+			Config.set("NoRecoil", value)
+			Weapon.setEnabled(value or Config.get("NoSway") or Config.get("NoSpread"))
+		end,
+	})
+
+	stabiliser:AddSlider("RecoilStrength", {
+		Text = "Compensation",
+		Default = Config.get("RecoilStrength"),
+		Min = 0,
+		Max = 1,
+		Rounding = 2,
+		Callback = function(value)
+			Config.set("RecoilStrength", value)
+		end,
+	})
+
+	stabiliser:AddToggle("NoSway", {
+		Text = "No sway (roll lock)",
+		Default = Config.get("NoSway"),
+		Callback = function(value)
+			Config.set("NoSway", value)
+			Weapon.setEnabled(value or Config.get("NoRecoil") or Config.get("NoSpread"))
+		end,
+	})
+
+	stabiliser:AddToggle("NoSpread", {
+		Text = "Camera FOV lock",
+		Tooltip = "Holds FieldOfView so aim punch cannot zoom you",
+		Default = Config.get("NoSpread"),
+		Callback = function(value)
+			Config.set("NoSpread", value)
+			Weapon.setEnabled(value or Config.get("NoRecoil") or Config.get("NoSway"))
+		end,
+	})
+
+	local silentBox = tabs.Weapon:AddLeftGroupbox("Silent aim")
+
+	silentBox:AddToggle("SilentAim", {
+		Text = "Silent aim",
+		Tooltip = "Redirects Mouse.Hit / Mouse.Target; games that fire from the camera ignore it",
+		Default = Config.get("SilentAim"),
+		Callback = function(value)
+			Config.set("SilentAim", value)
+			local ok, message = Silent.setEnabled(value)
+			if not ok then
+				notify("Silent aim: " .. tostring(message))
+			end
+		end,
+	})
+
+	silentBox:AddSlider("SilentFOV", {
+		Text = "Silent FOV",
+		Default = Config.get("SilentFOV"),
+		Min = 10,
+		Max = 800,
+		Rounding = 0,
+		Suffix = " px",
+		Callback = function(value)
+			Config.set("SilentFOV", value)
+		end,
+	})
+
+	silentBox:AddToggle("SilentTeamCheck", {
+		Text = "Team check",
+		Default = Config.get("SilentTeamCheck"),
+		Callback = function(value)
+			Config.set("SilentTeamCheck", value)
+		end,
+	})
+
+	local soundNames = {}
+	for _, entry in ipairs(Hitsound.choices) do
+		soundNames[#soundNames + 1] = entry.name
+	end
+
+	local soundBox = tabs.Weapon:AddRightGroupbox("Hit sounds")
+
+	soundBox:AddToggle("HitSound", {
+		Text = "Hit sounds",
+		Default = Config.get("HitSound"),
+		Callback = function(value)
+			Config.set("HitSound", value)
+			Hitsound.setEnabled(value)
+		end,
+	})
+
+	soundBox:AddDropdown("HitSoundChoice", {
+		Text = "Sound",
+		Values = soundNames,
+		Default = 1,
+		Multi = false,
+		Callback = function(value)
+			Config.set("HitSoundChoice", value)
+		end,
+	})
+
+	soundBox:AddSlider("HitSoundVolume", {
+		Text = "Volume",
+		Default = Config.get("HitSoundVolume"),
+		Min = 0,
+		Max = 3,
+		Rounding = 1,
+		Callback = function(value)
+			Config.set("HitSoundVolume", value)
+		end,
+	})
+
+	soundBox:AddSlider("HitSoundPitch", {
+		Text = "Pitch",
+		Default = Config.get("HitSoundPitch"),
+		Min = 0.5,
+		Max = 2,
+		Rounding = 2,
+		Callback = function(value)
+			Config.set("HitSoundPitch", value)
+		end,
+	})
+
+	soundBox:AddInput("HitSoundCustom", {
+		Text = "Custom sound id",
+		Default = "",
+		Placeholder = "rbxassetid or asset id",
+		Finished = true,
+		Callback = function(value)
+			Config.set("HitSoundCustom", value)
 		end,
 	})
 
@@ -678,6 +907,94 @@ local function buildLinoria()
 		end,
 	})
 
+	timeBox:AddSlider("Exposure", {
+		Text = "Exposure",
+		Default = Config.get("Exposure"),
+		Min = -2,
+		Max = 2,
+		Rounding = 2,
+		Callback = function(value)
+			Config.set("Exposure", value)
+			World.apply()
+		end,
+	})
+
+	timeBox:AddLabel("Ambient color"):AddColorPicker("AmbientColor", {
+		Default = Color3.fromRGB(200, 200, 200),
+		Title = "Ambient color",
+		Callback = function(value)
+			World.setAmbient(value)
+		end,
+	})
+
+	timeBox:AddLabel("Fog color"):AddColorPicker("FogColor", {
+		Default = Color3.fromRGB(190, 190, 190),
+		Title = "Fog color",
+		Callback = function(value)
+			World.setFogColor(value)
+		end,
+	})
+
+	local ambienceBox = tabs.World:AddRightGroupbox("Ambience")
+
+	ambienceBox:AddToggle("Ambience", {
+		Text = "Custom ambience",
+		Default = Config.get("Ambience"),
+		Callback = function(value)
+			Config.set("Ambience", value)
+			if value then
+				Ambience.apply()
+			else
+				Ambience.stop()
+			end
+		end,
+	})
+
+	local ambienceNames = {}
+	for _, entry in ipairs(Ambience.choices) do
+		ambienceNames[#ambienceNames + 1] = entry.name
+	end
+
+	ambienceBox:AddDropdown("AmbienceChoice", {
+		Text = "Track",
+		Values = ambienceNames,
+		Default = 1,
+		Multi = false,
+		Callback = function(value)
+			Config.set("AmbienceChoice", value)
+			if Config.get("Ambience") then
+				Ambience.apply()
+			end
+		end,
+	})
+
+	ambienceBox:AddSlider("AmbienceVolume", {
+		Text = "Volume",
+		Default = Config.get("AmbienceVolume"),
+		Min = 0,
+		Max = 2,
+		Rounding = 2,
+		Callback = function(value)
+			Config.set("AmbienceVolume", value)
+			if Config.get("Ambience") then
+				Ambience.apply()
+			end
+		end,
+	})
+
+	ambienceBox:AddInput("AmbienceCustom", {
+		Text = "Custom sound id",
+		Default = "",
+		Placeholder = "rbxassetid or asset id",
+		Finished = true,
+		Callback = function(value)
+			Config.set("AmbienceCustom", value)
+			if Config.get("Ambience") then
+				Ambience.apply()
+			end
+		end,
+	})
+
 	local physicsBox = tabs.World:AddRightGroupbox("Physics")
 
 	physicsBox:AddSlider("Gravity", {
@@ -969,6 +1286,13 @@ function UI.sync()
 			Options.ClockTime:SetValue(Config.get("ClockTime"))
 			Options.Gravity:SetValue(Config.get("Gravity"))
 			Options.Brightness:SetValue(Config.get("Brightness"))
+			Options.Trigger:SetValue(Config.get("Trigger"))
+			Options.NoRecoil:SetValue(Config.get("NoRecoil"))
+			Options.NoSway:SetValue(Config.get("NoSway"))
+			Options.NoSpread:SetValue(Config.get("NoSpread"))
+			Options.SilentAim:SetValue(Config.get("SilentAim"))
+			Options.HitSound:SetValue(Config.get("HitSound"))
+			Options.Ambience:SetValue(Config.get("Ambience"))
 		end)
 	end
 
@@ -986,6 +1310,13 @@ function UI.sync()
 	Hitbox.setEnabled(Config.get("Hitbox"))
 	HUD.setEnabled(Config.get("HUD"))
 	Crosshair.setEnabled(Config.get("Crosshair"))
+	Triggerbot.setEnabled(Config.get("Trigger"))
+	Weapon.setEnabled(Config.get("NoRecoil") or Config.get("NoSway") or Config.get("NoSpread"))
+	Silent.setEnabled(Config.get("SilentAim"))
+	Hitsound.setEnabled(Config.get("HitSound"))
+	if Config.get("Ambience") then
+		Ambience.apply()
+	end
 	Misc.setFullbright(Config.get("Fullbright"))
 	Misc.setNoFog(Config.get("NoFog"))
 	Misc.setCameraFOV(Config.get("CameraFOV"))
@@ -1036,6 +1367,11 @@ function UI.destroy()
 		HUD.destroy()
 		Crosshair.destroy()
 		World.destroy()
+		Triggerbot.destroy()
+		Weapon.destroy()
+		Silent.destroy()
+		Hitsound.destroy()
+		Ambience.destroy()
 		Misc.destroy()
 	end)
 	UI.backend = "none"

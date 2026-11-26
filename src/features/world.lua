@@ -18,6 +18,9 @@ function World.capture()
 		FogEnd = Lighting.FogEnd,
 		FogStart = Lighting.FogStart,
 		Gravity = Workspace.Gravity,
+		Ambient = Lighting.Ambient,
+		FogColor = Lighting.FogColor,
+		Exposure = Lighting.ExposureCompensation,
 	}
 end
 
@@ -26,7 +29,21 @@ function World.apply()
 	Lighting.ClockTime = Config.get("ClockTime")
 	Lighting.Brightness = Config.get("Brightness")
 	Lighting.FogEnd = Config.get("WorldFogEnd")
+	Lighting.ExposureCompensation = Config.get("Exposure")
 	Workspace.Gravity = Config.get("Gravity")
+	return true
+end
+
+function World.setAmbient(color)
+	World.capture()
+	Lighting.Ambient = color
+	Lighting.OutdoorAmbient = color
+	return true
+end
+
+function World.setFogColor(color)
+	World.capture()
+	Lighting.FogColor = color
 	return true
 end
 
@@ -38,6 +55,9 @@ function World.reset()
 	Lighting.Brightness = snapshot.Brightness
 	Lighting.FogEnd = snapshot.FogEnd
 	Lighting.FogStart = snapshot.FogStart
+	Lighting.Ambient = snapshot.Ambient
+	Lighting.FogColor = snapshot.FogColor
+	Lighting.ExposureCompensation = snapshot.Exposure
 	Workspace.Gravity = snapshot.Gravity
 	snapshot = nil
 	return true

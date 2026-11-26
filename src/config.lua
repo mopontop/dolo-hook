@@ -28,6 +28,8 @@ Config.defaults = {
 	AimPrediction = false,
 	AimFOVCircle = true,
 	AimMaxDistance = 600,
+	AimOffsetY = 0,
+	AimPredictionAmount = 0.12,
 	-- visuals
 	ESP = false,
 	ESPBox = true,
@@ -47,6 +49,7 @@ Config.defaults = {
 	Gravity = 196.2,
 	WorldFogEnd = 100000,
 	Brightness = 2,
+	Exposure = 0,
 	-- hud
 	HUD = false,
 	HUD_FPS = true,
@@ -70,6 +73,31 @@ Config.defaults = {
 	Freeze = false,
 	ClickTeleport = false,
 	ClickTeleportKey = "T",
+	-- weapon
+	Trigger = false,
+	TriggerKey = "MB2",
+	TriggerFOV = 6,
+	TriggerDelay = 0.05,
+	TriggerVisibleOnly = true,
+	TriggerTeamCheck = true,
+	TriggerMaxDistance = 500,
+	NoRecoil = false,
+	RecoilStrength = 0.85,
+	NoSway = false,
+	NoSpread = false,
+	SilentAim = false,
+	SilentFOV = 140,
+	SilentTeamCheck = true,
+	-- audio
+	HitSound = false,
+	HitSoundChoice = "Ping",
+	HitSoundVolume = 1,
+	HitSoundPitch = 1,
+	HitSoundCustom = "",
+	Ambience = false,
+	AmbienceChoice = "Hum",
+	AmbienceVolume = 0.3,
+	AmbienceCustom = "",
 }
 
 local values = {}

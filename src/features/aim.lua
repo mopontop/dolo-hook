@@ -35,11 +35,13 @@ local function targetPosition(entry)
 	local position = part.Position
 
 	if Config.get("AimPrediction") then
-		-- 120ms lead time against the root velocity; enough to lead a walk cycle.
+		-- Lead the target by the configured window against root velocity.
 		local root = entry.root
-		position = position + root.AssemblyLinearVelocity * 0.12
+		local lead = Config.get("AimPredictionAmount") or 0.12
+		position = position + root.AssemblyLinearVelocity * lead
 	end
-	return position
+
+	return position + Vector3.new(0, Config.get("AimOffsetY") or 0, 0)
 end
 
 local function step()

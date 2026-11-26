@@ -23,7 +23,8 @@ changing the owner in `loadstring.lua` and here (`scripts/push.py` does both).
 | **Visuals** | ESP box, name, health, distance, tracers, skeleton, chams, team check, max distance, colour picker · World: fullbright, no fog, camera FOV · Crosshair: arms, gap, thickness, dot, colour |
 | **HUD** | FPS, ping, player count, position, clock, HUD colour |
 | **Movement** | Walk speed, jump power, bunny hop, fly + speed, NoClip, infinite jump, hover, no fall damage, freeze, click teleport |
-| **World** | Time of day, brightness, fog distance, gravity, reset world |
+| **Weapon** | Trigger bot (key, radius, delay, visible-only, team check) · no recoil + compensation · roll lock (no sway) · FOV lock · silent aim (mouse hook) + FOV · hit sounds with 8 built-ins, volume, pitch, custom id |
+| **World** | Time of day, brightness, fog distance, exposure, gravity, ambient + fog colour pickers, reset world · custom ambience with track, volume and custom id |
 | **Teleport** | Waypoints (save/list/go), teleport to player, refresh, spectate / stop spectating, click-teleport key |
 | **Misc** | Anti-AFK, reset, rejoin, server info, copy JobId, test notification, unload |
 | **Config** | Save / load settings, menu keybind |
