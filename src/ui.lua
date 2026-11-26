@@ -370,7 +370,7 @@ function UI.build()
 		return window
 	end
 
-	local Rayfield = loadRayfield()
+	Rayfield = loadRayfield()
 	loaded = true
 
 	Util.setNotifier(function(title, content)

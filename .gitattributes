@@ -1,0 +1,6 @@
+# Raw GitHub serving: LF everywhere so loadstring never sees CRLF in string bodies.
+* text=auto eol=lf
+
+*.lua text eol=lf
+*.py text eol=lf
+*.md text eol=lf
