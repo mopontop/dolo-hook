@@ -8,14 +8,41 @@ local FILE = FOLDER .. "/settings.json"
 
 -- Color3 and instance references are session-only; only primitives persist.
 Config.defaults = {
+	-- movement
 	WalkSpeed = 16,
 	JumpPower = 50,
 	FlySpeed = 60,
 	Fly = false,
 	NoClip = false,
 	InfiniteJump = false,
+	Bhop = false,
+	Hover = false,
+	-- aim
+	Aim = false,
+	AimKey = "MB2",
+	AimSmooth = 0.35,
+	AimFOV = 140,
+	AimPart = "Head",
+	AimVisibleOnly = false,
+	AimTeamCheck = true,
+	AimPrediction = false,
+	AimFOVCircle = true,
+	AimMaxDistance = 600,
+	-- visuals
 	ESP = false,
+	ESPBox = true,
+	ESPName = true,
+	ESPHealth = true,
+	ESPDistance = true,
+	ESPTracer = false,
+	ESPSkeleton = false,
+	ESPChams = false,
+	ESPTeamCheck = false,
+	ESPMaxDistance = 500,
 	Fullbright = false,
+	NoFog = false,
+	CameraFOV = 70,
+	-- session
 	AntiAFK = true,
 }
 

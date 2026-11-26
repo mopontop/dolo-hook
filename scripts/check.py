@@ -85,7 +85,9 @@ def check(path: Path) -> list[str]:
 
     tokens = IDENT.findall(stripped)
 
-    openers = sum(1 for token in tokens if token in {"function", "if", "for", "while"})
+    # One `end` per function, per `if`, and per `do` (for/while headers and
+    # standalone do-blocks all carry a `do`), so count those three.
+    openers = sum(1 for token in tokens if token in {"function", "if", "do"})
     closers = sum(1 for token in tokens if token == "end")
     repeats = sum(1 for token in tokens if token == "repeat")
     untils = sum(1 for token in tokens if token == "until")

@@ -14,6 +14,9 @@ local state = {
 	flyConn = nil,
 	noclipConn = nil,
 	jumpConn = nil,
+	bhopConn = nil,
+	hoverBody = nil,
+	hoverConn = nil,
 	touched = {},
 }
 
@@ -224,10 +227,90 @@ function Player.bind()
 	end)
 end
 
+function Player.setBhop(enabled)
+	Config.set("Bhop", enabled)
+
+	if not enabled then
+		if state.bhopConn then
+			state.bhopConn:Disconnect()
+			state.bhopConn = nil
+		end
+		return true
+	end
+
+	if state.bhopConn then
+		return true
+	end
+	-- Land -> jump again, every frame until the toggle goes off.
+	state.bhopConn = RunService.Heartbeat:Connect(function()
+		local humanoid = Util.getHumanoid()
+		if not humanoid or humanoid.Health <= 0 then
+			return
+		end
+		local current = humanoid:GetState()
+		if current == Enum.HumanoidStateType.Landed or current == Enum.HumanoidStateType.Running then
+			humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end)
+	return true
+end
+
+local function attachHover()
+	local root = Util.getRoot()
+	if not root then
+		return false
+	end
+	if state.hoverBody then
+		state.hoverBody:Destroy()
+	end
+
+	local body = Instance.new("BodyVelocity")
+	body.Name = "DoloHook_Hover"
+	body.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+	body.Velocity = Vector3.zero
+	body.Parent = root
+	state.hoverBody = body
+	return true
+end
+
+function Player.setHover(enabled)
+	Config.set("Hover", enabled)
+
+	if not enabled then
+		if state.hoverConn then
+			state.hoverConn:Disconnect()
+			state.hoverConn = nil
+		end
+		if state.hoverBody then
+			state.hoverBody:Destroy()
+			state.hoverBody = nil
+		end
+		return true
+	end
+
+	if not attachHover() then
+		return false, "no character"
+	end
+
+	if not state.hoverConn then
+		state.hoverConn = RunService.RenderStepped:Connect(function()
+			if not state.hoverBody or not state.hoverBody.Parent then
+				if not attachHover() then
+					return
+				end
+			end
+			state.hoverBody.Velocity = Vector3.zero
+		end)
+	end
+	return true
+end
+
 function Player.destroy()
 	Player.setFly(false)
 	Player.setNoClip(false)
 	Player.setInfiniteJump(false)
+	Player.setBhop(false)
+	Player.setHover(false)
 end
 
 return Player

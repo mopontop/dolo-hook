@@ -8,6 +8,7 @@ local Misc = {}
 
 local originals
 local idleConn
+local fogOriginals
 
 function Misc.setFullbright(enabled)
 	if enabled then
@@ -66,8 +67,36 @@ function Misc.rejoin()
 	return true
 end
 
+function Misc.setNoFog(enabled)
+	if enabled then
+		if fogOriginals then
+			return true
+		end
+		fogOriginals = { FogEnd = Lighting.FogEnd, FogStart = Lighting.FogStart }
+		Lighting.FogEnd = 100000
+		Lighting.FogStart = 100000
+		return true
+	end
+	if fogOriginals then
+		Lighting.FogEnd = fogOriginals.FogEnd
+		Lighting.FogStart = fogOriginals.FogStart
+		fogOriginals = nil
+	end
+	return true
+end
+
+function Misc.setCameraFOV(value)
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return false, "no camera"
+	end
+	camera.FieldOfView = value
+	return true
+end
+
 function Misc.destroy()
 	Misc.setFullbright(false)
+	Misc.setNoFog(false)
 	Misc.setAntiAFK(false)
 end
 

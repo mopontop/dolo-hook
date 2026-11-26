@@ -17,23 +17,26 @@ changing the owner in `loadstring.lua` and here (`scripts/push.py` does both).
 
 ## What's in the window
 
-| Tab | Element | Backing code |
-| --- | --- | --- |
-| Player | Walk Speed slider (8–300) | `Humanoid.WalkSpeed`, reapplied on respawn |
-| Player | Jump Power slider (50–500) | `Humanoid.JumpPower` with `UseJumpPower` |
-| Player | Fly toggle + speed | `BodyVelocity` on the root, camera-relative WASD, Space/Ctrl vertical |
-| Player | NoClip toggle | `Stepped` sweep over character parts, originals restored on disable |
-| Player | Infinite Jump toggle | `JumpRequest` → `HumanoidStateType.Jumping` |
-| Player | Reset Character | `Humanoid.Health = 0` |
-| Visuals | Player ESP + color | `Highlight` per character, `AlwaysOnTop`, local-only instances |
-| Visuals | Fullbright | Lighting overrides with a stored snapshot |
-| Teleport | Save / go / list waypoints | `Camera.CFrame` snapshots, `Model:PivotTo` |
-| Teleport | Teleport to player | dropdown fed from `Players:GetPlayers()` |
-| Misc | Anti-AFK | `VirtualUser:ClickButton2` on `Idled` |
-| Misc | Rejoin server | `TeleportService:Teleport` |
-| Misc | Test notification | Rayfield notify round-trip |
-| Misc | Destroy UI | unloads features, drops the window |
-| Config | Save / Load | primitives to `Dolo.Hook/settings.json` via `writefile` |
+| Tab | Elements |
+| --- | --- |
+| **Aim** | Aimbot toggle, aim key (`MB2` / `MB1` / `E` / `Q` / Always), aim part (Head / Torso / Root), FOV radius 10–600 px, smoothing 0.05–0.95, visible-only raycast, team check, velocity prediction, FOV ring, max distance |
+| **Visuals** | Player ESP with box, name, health bar, distance, tracers, skeleton, chams, team check, max distance and colour picker · World: fullbright, no fog, camera FOV |
+| **Movement** | Walk speed 8–300, jump power 50–500, bunny hop, fly + fly speed, NoClip, infinite jump, hover |
+| **Teleport** | Save / teleport / list waypoints, teleport to player, player list refresh |
+| **Misc** | Anti-AFK, reset character, rejoin, test notification, unload |
+| **Config** | Save / load settings, menu keybind |
+
+| Backing module | What it does |
+| --- | --- |
+| `features/aim.lua` | `CFrame:Lerp` toward the target part each `RenderStepped`, FOV-gated, optional raycast visibility and 120 ms velocity lead |
+| `features/targeting.lua` | player/character enumeration, team filter, `WorldToViewportPoint` projection, line-of-sight raycast |
+| `features/visuals.lua` | `Drawing` box/name/health/distance/tracer/skeleton/FOV ring, per-player lifecycle, distance culling |
+| `features/draw.lua` | guarded wrapper over the executor `Drawing` API — returns `nil` instead of erroring when absent |
+| `features/esp.lua` | `Highlight` chams, `AlwaysOnTop`, local-only instances |
+| `features/player.lua` | speed, jump, fly (`BodyVelocity`), NoClip sweep, infinite jump, bunny hop, hover |
+| `features/teleport.lua` | camera-snapshot waypoints, `Model:PivotTo` |
+| `features/misc.lua` | fullbright, no fog, camera FOV, anti-AFK, rejoin |
+| `features/interface.lua` | bundled fallback window (used only if Linoria cannot be fetched) |
 
 Every toggle is wired to a module function — the UI layer holds no logic beyond
 element → module calls.
