@@ -17,6 +17,7 @@ local state = {
 	bhopConn = nil,
 	hoverBody = nil,
 	hoverConn = nil,
+	fallConn = nil,
 	touched = {},
 }
 
@@ -198,6 +199,48 @@ function Player.resetCharacter()
 	return true
 end
 
+function Player.setNoFallDamage(enabled)
+	Config.set("NoFallDamage", enabled)
+
+	if not enabled then
+		if state.fallConn then
+			state.fallConn:Disconnect()
+			state.fallConn = nil
+		end
+		local humanoid = Util.getHumanoid()
+		if humanoid then
+			pcall(function()
+				humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+			end)
+		end
+		return true
+	end
+
+	if state.fallConn then
+		return true
+	end
+	state.fallConn = RunService.Heartbeat:Connect(function()
+		local humanoid = Util.getHumanoid()
+		if humanoid then
+			pcall(function()
+				humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+			end)
+		end
+	end)
+	return true
+end
+
+function Player.setFreeze(enabled)
+	Config.set("Freeze", enabled)
+
+	local root = Util.getRoot()
+	if not root then
+		return false, "no character"
+	end
+	root.Anchored = enabled
+	return true
+end
+
 -- Re-apply persistent settings on respawn; a respawn hands us a fresh character.
 function Player.bind()
 	local localPlayer = Players.LocalPlayer
@@ -311,6 +354,10 @@ function Player.destroy()
 	Player.setInfiniteJump(false)
 	Player.setBhop(false)
 	Player.setHover(false)
+	Player.setNoFallDamage(false)
+	pcall(function()
+		Player.setFreeze(false)
+	end)
 end
 
 return Player

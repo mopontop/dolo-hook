@@ -8,6 +8,12 @@ local Teleport = __require("features/teleport")
 local Misc = __require("features/misc")
 local Aim = __require("features/aim")
 local Visuals = __require("features/visuals")
+local World = __require("features/world")
+local HUD = __require("features/hud")
+local Crosshair = __require("features/crosshair")
+local Hitbox = __require("features/hitbox")
+
+local UserInputService = game:GetService("UserInputService")
 
 local UI = { backend = "none" }
 
@@ -106,7 +112,9 @@ local function buildLinoria()
 	local tabs = {
 		Aim = window:AddTab("Aim"),
 		Visuals = window:AddTab("Visuals"),
+		HUD = window:AddTab("HUD"),
 		Movement = window:AddTab("Movement"),
+		World = window:AddTab("World"),
 		Teleport = window:AddTab("Teleport"),
 		Misc = window:AddTab("Misc"),
 		Config = window:AddTab("Config"),
@@ -214,6 +222,40 @@ local function buildLinoria()
 		Suffix = " studs",
 		Callback = function(value)
 			Config.set("AimMaxDistance", value)
+		end,
+	})
+
+	aimchecks:AddDropdown("AimPriority", {
+		Text = "Target priority",
+		Values = { "Crosshair", "Distance", "Health" },
+		Default = 1,
+		Multi = false,
+		Callback = function(value)
+			Config.set("AimPriority", value)
+		end,
+	})
+
+	local hitboxBox = tabs.Aim:AddLeftGroupbox("Hitbox")
+
+	hitboxBox:AddToggle("Hitbox", {
+		Text = "Expand hitboxes",
+		Tooltip = "Client-side head resize on other players",
+		Default = Config.get("Hitbox"),
+		Callback = function(value)
+			Config.set("Hitbox", value)
+			Hitbox.setEnabled(value)
+		end,
+	})
+
+	hitboxBox:AddSlider("HitboxScale", {
+		Text = "Head scale",
+		Default = Config.get("HitboxScale"),
+		Min = 1,
+		Max = 6,
+		Rounding = 1,
+		Suffix = "x",
+		Callback = function(value)
+			Config.set("HitboxScale", value)
 		end,
 	})
 
@@ -349,6 +391,136 @@ local function buildLinoria()
 		end,
 	})
 
+	local crossBox = tabs.Visuals:AddRightGroupbox("Crosshair")
+
+	crossBox:AddToggle("Crosshair", {
+		Text = "Crosshair",
+		Default = Config.get("Crosshair"),
+		Callback = function(value)
+			Config.set("Crosshair", value)
+			local ok, message = Crosshair.setEnabled(value)
+			if not ok then
+				notify("Crosshair: " .. tostring(message))
+			end
+		end,
+	})
+
+	crossBox:AddSlider("CrosshairSize", {
+		Text = "Arm length",
+		Default = Config.get("CrosshairSize"),
+		Min = 2,
+		Max = 40,
+		Rounding = 0,
+		Suffix = " px",
+		Callback = function(value)
+			Config.set("CrosshairSize", value)
+		end,
+	})
+
+	crossBox:AddSlider("CrosshairGap", {
+		Text = "Centre gap",
+		Default = Config.get("CrosshairGap"),
+		Min = 0,
+		Max = 30,
+		Rounding = 0,
+		Suffix = " px",
+		Callback = function(value)
+			Config.set("CrosshairGap", value)
+		end,
+	})
+
+	crossBox:AddSlider("CrosshairThickness", {
+		Text = "Thickness",
+		Default = Config.get("CrosshairThickness"),
+		Min = 1,
+		Max = 6,
+		Rounding = 0,
+		Callback = function(value)
+			Config.set("CrosshairThickness", value)
+		end,
+	})
+
+	crossBox:AddToggle("CrosshairDot", {
+		Text = "Centre dot",
+		Default = Config.get("CrosshairDot"),
+		Callback = function(value)
+			Config.set("CrosshairDot", value)
+		end,
+	})
+
+	crossBox:AddLabel("Crosshair color"):AddColorPicker("CrosshairColor", {
+		Default = Color3.fromRGB(255, 255, 255),
+		Title = "Crosshair color",
+		Callback = function(value)
+			Crosshair.setColor(value)
+		end,
+	})
+
+	-- ---------------------------------------------------------------- hud
+	local hudBox = tabs.HUD:AddLeftGroupbox("Readouts")
+
+	hudBox:AddToggle("HUD", {
+		Text = "HUD",
+		Default = Config.get("HUD"),
+		Callback = function(value)
+			Config.set("HUD", value)
+			local ok, message = HUD.setEnabled(value)
+			if not ok then
+				notify("HUD: " .. tostring(message))
+			end
+		end,
+	})
+
+	hudBox:AddToggle("HUD_FPS", {
+		Text = "FPS",
+		Default = Config.get("HUD_FPS"),
+		Callback = function(value)
+			Config.set("HUD_FPS", value)
+		end,
+	})
+
+	hudBox:AddToggle("HUD_Ping", {
+		Text = "Ping",
+		Default = Config.get("HUD_Ping"),
+		Callback = function(value)
+			Config.set("HUD_Ping", value)
+		end,
+	})
+
+	hudBox:AddToggle("HUD_Players", {
+		Text = "Player count",
+		Default = Config.get("HUD_Players"),
+		Callback = function(value)
+			Config.set("HUD_Players", value)
+		end,
+	})
+
+	hudBox:AddToggle("HUD_Coords", {
+		Text = "Position",
+		Default = Config.get("HUD_Coords"),
+		Callback = function(value)
+			Config.set("HUD_Coords", value)
+		end,
+	})
+
+	hudBox:AddToggle("HUD_Clock", {
+		Text = "Clock",
+		Default = Config.get("HUD_Clock"),
+		Callback = function(value)
+			Config.set("HUD_Clock", value)
+		end,
+	})
+
+	local hudStyle = tabs.HUD:AddRightGroupbox("Style")
+
+	hudStyle:AddLabel("HUD color"):AddColorPicker("HUDColor", {
+		Default = Color3.fromRGB(235, 235, 242),
+		Title = "HUD color",
+		Callback = function(value)
+			HUD.setColor(value)
+		end,
+	})
+
 	-- ----------------------------------------------------------- movement
 	local speedBox = tabs.Movement:AddLeftGroupbox("Speed")
 
@@ -439,6 +611,95 @@ local function buildLinoria()
 		end,
 	})
 
+	flightBox:AddToggle("NoFallDamage", {
+		Text = "No fall damage",
+		Default = Config.get("NoFallDamage"),
+		Callback = function(value)
+			Player.setNoFallDamage(value)
+		end,
+	})
+
+	flightBox:AddToggle("Freeze", {
+		Text = "Freeze character",
+		Default = Config.get("Freeze"),
+		Callback = function(value)
+			local ok, message = Player.setFreeze(value)
+			if not ok then
+				notify("Freeze: " .. tostring(message))
+			end
+		end,
+	})
+
+	flightBox:AddToggle("ClickTeleport", {
+		Text = "Click teleport",
+		Tooltip = "Press T (rebindable) to jump to the surface under the cursor",
+		Default = Config.get("ClickTeleport"),
+		Callback = function(value)
+			Config.set("ClickTeleport", value)
+		end,
+	})
+
+	-- -------------------------------------------------------------- world
+	local timeBox = tabs.World:AddLeftGroupbox("Lighting")
+
+	timeBox:AddSlider("ClockTime", {
+		Text = "Time of day",
+		Default = Config.get("ClockTime"),
+		Min = 0,
+		Max = 24,
+		Rounding = 1,
+		Callback = function(value)
+			Config.set("ClockTime", value)
+			World.apply()
+		end,
+	})
+
+	timeBox:AddSlider("Brightness", {
+		Text = "Brightness",
+		Default = Config.get("Brightness"),
+		Min = 0,
+		Max = 5,
+		Rounding = 1,
+		Callback = function(value)
+			Config.set("Brightness", value)
+			World.apply()
+		end,
+	})
+
+	timeBox:AddSlider("WorldFogEnd", {
+		Text = "Fog distance",
+		Default = Config.get("WorldFogEnd"),
+		Min = 100,
+		Max = 100000,
+		Rounding = 0,
+		Callback = function(value)
+			Config.set("WorldFogEnd", value)
+			World.apply()
+		end,
+	})
+
+	local physicsBox = tabs.World:AddRightGroupbox("Physics")
+
+	physicsBox:AddSlider("Gravity", {
+		Text = "Gravity",
+		Default = Config.get("Gravity"),
+		Min = 0,
+		Max = 500,
+		Rounding = 1,
+		Callback = function(value)
+			Config.set("Gravity", value)
+			World.apply()
+		end,
+	})
+
+	physicsBox:AddButton({
+		Text = "Reset world",
+		Func = function()
+			World.reset()
+			notify("World restored")
+		end,
+	})
+
 	-- ----------------------------------------------------------- teleport
 	local waypoints = tabs.Teleport:AddLeftGroupbox("Waypoints")
 
@@ -521,6 +782,35 @@ local function buildLinoria()
 		end,
 	})
 
+	targets:AddButton({
+		Text = "Spectate player",
+		Func = function()
+			local selected = Options and Options.TargetPlayer and Options.TargetPlayer.Value
+			if not selected or selected == "" then
+				notify("Pick a player first")
+				return
+			end
+			report(Teleport.spectate(selected), nil, "spectating")
+		end,
+	})
+
+	targets:AddButton({
+		Text = "Stop spectating",
+		Func = function()
+			report(Teleport.unspectate(), nil, "back to your character")
+		end,
+	})
+
+	targets:AddDropdown("ClickTeleportKey", {
+		Text = "Click teleport key",
+		Values = { "T", "G", "V", "F" },
+		Default = 1,
+		Multi = false,
+		Callback = function(value)
+			Config.set("ClickTeleportKey", value)
+		end,
+	})
+
 	-- --------------------------------------------------------------- misc
 	local session = tabs.Misc:AddLeftGroupbox("Session")
 
@@ -550,6 +840,21 @@ local function buildLinoria()
 	})
 
 	local tools = tabs.Misc:AddRightGroupbox("Interface")
+
+	tools:AddButton({
+		Text = "Server info",
+		Func = function()
+			local info = Misc.serverInfo()
+			notify(("job %s… | %s players"):format(info.job:sub(1, 8), info.players), 6)
+		end,
+	})
+
+	tools:AddButton({
+		Text = "Copy JobId",
+		Func = function()
+			report(Misc.copyJobId(), "JobId copied")
+		end,
+	})
 
 	tools:AddButton({
 		Text = "Test notification",
@@ -597,6 +902,21 @@ local function buildLinoria()
 
 	Library.ToggleKeybind = Options and Options.MenuKeybind
 
+	-- Click teleport: bound here so it keeps working while the menu is closed.
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed or not Config.get("ClickTeleport") then
+			return
+		end
+		local key = Config.get("ClickTeleportKey") or "T"
+		local keyCode = Enum.KeyCode[key]
+		if keyCode and input.KeyCode == keyCode then
+			local ok, message = Teleport.toCursor()
+			if not ok then
+				notify("Teleport: " .. tostring(message))
+			end
+		end
+	end)
+
 	if type(Library.SetWatermark) == "function" then
 		pcall(function()
 			Library:SetWatermark("Dolo.Hook")
@@ -641,6 +961,14 @@ function UI.sync()
 			Options.NoFog:SetValue(Config.get("NoFog"))
 			Options.AntiAFK:SetValue(Config.get("AntiAFK"))
 			Options.Aim:SetValue(Config.get("Aim"))
+			Options.HUD:SetValue(Config.get("HUD"))
+			Options.Crosshair:SetValue(Config.get("Crosshair"))
+			Options.Hitbox:SetValue(Config.get("Hitbox"))
+			Options.Freeze:SetValue(Config.get("Freeze"))
+			Options.NoFallDamage:SetValue(Config.get("NoFallDamage"))
+			Options.ClockTime:SetValue(Config.get("ClockTime"))
+			Options.Gravity:SetValue(Config.get("Gravity"))
+			Options.Brightness:SetValue(Config.get("Brightness"))
 		end)
 	end
 
@@ -651,9 +979,13 @@ function UI.sync()
 	Player.setInfiniteJump(Config.get("InfiniteJump"))
 	Player.setBhop(Config.get("Bhop"))
 	Player.setHover(Config.get("Hover"))
+	Player.setNoFallDamage(Config.get("NoFallDamage"))
 	Aim.setEnabled(Config.get("Aim"))
 	Visuals.setEnabled(Config.get("ESP"))
 	ESP.setEnabled(Config.get("ESPChams"))
+	Hitbox.setEnabled(Config.get("Hitbox"))
+	HUD.setEnabled(Config.get("HUD"))
+	Crosshair.setEnabled(Config.get("Crosshair"))
 	Misc.setFullbright(Config.get("Fullbright"))
 	Misc.setNoFog(Config.get("NoFog"))
 	Misc.setCameraFOV(Config.get("CameraFOV"))
@@ -700,6 +1032,10 @@ function UI.destroy()
 		ESP.destroy()
 		Aim.destroy()
 		Visuals.destroy()
+		Hitbox.destroy()
+		HUD.destroy()
+		Crosshair.destroy()
+		World.destroy()
 		Misc.destroy()
 	end)
 	UI.backend = "none"

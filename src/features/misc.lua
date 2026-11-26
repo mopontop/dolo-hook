@@ -67,6 +67,22 @@ function Misc.rejoin()
 	return true
 end
 
+function Misc.serverInfo()
+	local info = {
+		place = tostring(game.PlaceId),
+		job = tostring(game.JobId),
+		players = tostring(#Players:GetPlayers()),
+	}
+	return info
+end
+
+function Misc.copyJobId()
+	local ok = pcall(function()
+		setclipboard(tostring(game.JobId))
+	end)
+	return ok
+end
+
 function Misc.setNoFog(enabled)
 	if enabled then
 		if fogOriginals then

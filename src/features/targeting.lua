@@ -119,6 +119,7 @@ function Targeting.closestToScreen(options)
 	local viewport = Targeting.viewport()
 	local center = viewport * 0.5
 	local fov = options.fov or 0
+	local priority = options.priority or "Crosshair"
 
 	local best, bestScore
 	for _, entry in ipairs(Targeting.candidates(options)) do
@@ -128,7 +129,12 @@ function Targeting.closestToScreen(options)
 			if screen and onScreen then
 				local distance = (screen - center).Magnitude
 				if fov <= 0 or distance <= fov then
-					local score = distance + (options.fovWeight and entry.distance * 0.01 or 0)
+					local score = distance
+					if priority == "Distance" then
+						score = entry.distance
+					elseif priority == "Health" then
+						score = entry.humanoid.Health
+					end
 					if not bestScore or score < bestScore then
 						best, bestScore = entry, score
 					end

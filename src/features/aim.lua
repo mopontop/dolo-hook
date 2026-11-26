@@ -57,7 +57,7 @@ local function step()
 		part = Config.get("AimPart"),
 		teamCheck = Config.get("AimTeamCheck"),
 		maxDistance = Config.get("AimMaxDistance"),
-		fovWeight = true,
+		priority = Config.get("AimPriority"),
 	})
 	if not entry then
 		return

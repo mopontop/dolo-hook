@@ -19,11 +19,13 @@ changing the owner in `loadstring.lua` and here (`scripts/push.py` does both).
 
 | Tab | Elements |
 | --- | --- |
-| **Aim** | Aimbot toggle, aim key (`MB2` / `MB1` / `E` / `Q` / Always), aim part (Head / Torso / Root), FOV radius 10–600 px, smoothing 0.05–0.95, visible-only raycast, team check, velocity prediction, FOV ring, max distance |
-| **Visuals** | Player ESP with box, name, health bar, distance, tracers, skeleton, chams, team check, max distance and colour picker · World: fullbright, no fog, camera FOV |
-| **Movement** | Walk speed 8–300, jump power 50–500, bunny hop, fly + fly speed, NoClip, infinite jump, hover |
-| **Teleport** | Save / teleport / list waypoints, teleport to player, player list refresh |
-| **Misc** | Anti-AFK, reset character, rejoin, test notification, unload |
+| **Aim** | Aimbot, aim key (`MB2`/`MB1`/`E`/`Q`/Always), aim part, FOV radius, smoothing, visible-only, team check, velocity prediction, FOV ring, max distance, target priority (crosshair/distance/health), hitbox expander + head scale |
+| **Visuals** | ESP box, name, health, distance, tracers, skeleton, chams, team check, max distance, colour picker · World: fullbright, no fog, camera FOV · Crosshair: arms, gap, thickness, dot, colour |
+| **HUD** | FPS, ping, player count, position, clock, HUD colour |
+| **Movement** | Walk speed, jump power, bunny hop, fly + speed, NoClip, infinite jump, hover, no fall damage, freeze, click teleport |
+| **World** | Time of day, brightness, fog distance, gravity, reset world |
+| **Teleport** | Waypoints (save/list/go), teleport to player, refresh, spectate / stop spectating, click-teleport key |
+| **Misc** | Anti-AFK, reset, rejoin, server info, copy JobId, test notification, unload |
 | **Config** | Save / load settings, menu keybind |
 
 | Backing module | What it does |

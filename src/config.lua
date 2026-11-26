@@ -42,8 +42,34 @@ Config.defaults = {
 	Fullbright = false,
 	NoFog = false,
 	CameraFOV = 70,
+	-- world
+	ClockTime = 14,
+	Gravity = 196.2,
+	WorldFogEnd = 100000,
+	Brightness = 2,
+	-- hud
+	HUD = false,
+	HUD_FPS = true,
+	HUD_Ping = true,
+	HUD_Players = true,
+	HUD_Coords = false,
+	HUD_Clock = false,
+	-- crosshair
+	Crosshair = false,
+	CrosshairSize = 10,
+	CrosshairGap = 5,
+	CrosshairThickness = 1,
+	CrosshairDot = true,
+	-- combat extras
+	AimPriority = "Crosshair",
+	Hitbox = false,
+	HitboxScale = 2,
 	-- session
 	AntiAFK = true,
+	NoFallDamage = false,
+	Freeze = false,
+	ClickTeleport = false,
+	ClickTeleportKey = "T",
 }
 
 local values = {}
