@@ -93,14 +93,16 @@ anything with `loadstring`, `HttpGet`, `writefile`).
 
 ## Notes
 
-- **Rayfield is fetched at runtime** from `https://sirius.menu/rayfield`. It is
-  the only external dependency; the repo serves everything else. Pinning to a
-  mirror means swapping `RAYFIELD_URL` in `src/ui.lua` — the official loader is
-  the only copy that stays current.
-- **The GUI is third-party.** Rayfield is [SiriusSoftwareLtd/Rayfield](https://github.com/SiriusSoftwareLtd/Rayfield),
-  MIT-licensed, and its loader pulls the latest release on every execution. A
-  library update can move an element API before this repo catches up; that is
-  the tradeoff for not vendoring 5k lines.
+- **Zero external dependencies.** The window is `src/interface.lua`, a
+  self-contained widget set (draggable frame, tabs, sections, toggle, slider,
+  button, text input, dropdown, colour swatches, toasts) built from plain Roblox
+  instances. Nothing is fetched at runtime except this repo's own release file,
+  so an executor's domain whitelist cannot break the UI.
+- **The interface API mirrors Rayfield** (`CreateWindow` → `CreateTab` →
+  `CreateToggle` / `CreateSlider` / `CreateButton` / `CreateDropdown` /
+  `CreateInput` / `CreateColorPicker`, plus `Notify`), because `src/ui.lua` was
+  written against it first. Swapping in the real Rayfield later means changing
+  one function — `loadRayfield` in `src/ui.lua`.
 - **Client-side only.** `WalkSpeed`, `Fly`, `NoClip` and `ESP` are local
   changes. Any game that authoritatively validates movement will snap you back
   or flag it. There is no anti-cheat bypass in this repo and none is planned.

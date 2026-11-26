@@ -25,6 +25,7 @@ ORDER = [
     "features/esp",
     "features/teleport",
     "features/misc",
+    "interface",
     "ui",
     "init",
 ]

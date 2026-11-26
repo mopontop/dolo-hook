@@ -1,4 +1,5 @@
--- ui.lua — Rayfield window. Requires the feature modules before it runs.
+-- ui.lua — window built on the bundled interface module. Requires the feature
+-- modules before it runs.
 local Config = __require("config")
 local Util = __require("util")
 local Player = __require("features/player")
@@ -7,8 +8,6 @@ local Teleport = __require("features/teleport")
 local Misc = __require("features/misc")
 
 local UI = {}
-
-local RAYFIELD_URL = "https://sirius.menu/rayfield"
 
 local Rayfield
 local window
@@ -38,11 +37,9 @@ local function report(result, okMessage)
 end
 
 local function loadRayfield()
-	local loader = loadstring(game:HttpGet(RAYFIELD_URL))
-	if type(loader) ~= "function" then
-		error("rayfield loader did not return a function")
-	end
-	return loader()
+	-- Bundled window library: same call surface the UI was written against,
+	-- no network fetch, nothing to be blocked by an executor's domain rules.
+	return __require("interface")
 end
 
 local function buildPlayerTab(Rayfield, tab)
