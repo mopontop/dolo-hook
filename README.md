@@ -93,16 +93,17 @@ anything with `loadstring`, `HttpGet`, `writefile`).
 
 ## Notes
 
-- **Zero external dependencies.** The window is `src/interface.lua`, a
-  self-contained widget set (draggable frame, tabs, sections, toggle, slider,
-  button, text input, dropdown, colour swatches, toasts) built from plain Roblox
-  instances. Nothing is fetched at runtime except this repo's own release file,
-  so an executor's domain whitelist cannot break the UI.
-- **The interface API mirrors Rayfield** (`CreateWindow` → `CreateTab` →
-  `CreateToggle` / `CreateSlider` / `CreateButton` / `CreateDropdown` /
-  `CreateInput` / `CreateColorPicker`, plus `Notify`), because `src/ui.lua` was
-  written against it first. Swapping in the real Rayfield later means changing
-  one function — `loadRayfield` in `src/ui.lua`.
+- **Front-end: Linoria.** `src/ui.lua` fetches `LinoriaLib/Library.lua` from
+  [`wally-rblx/LinoriaLib`](https://github.com/wally-rblx/LinoriaLib) — that is
+  the canonical copy; the `Eazvy/UILibs` Linoria folder ships only the example
+  and the README, and its example loader points at the same wally-rblx path.
+  Tabs are Main / Visuals / Teleport / Config, built from left/right groupboxes.
+- **Fallback: bundled window.** `src/interface.lua` is a self-contained widget
+  set (draggable frame, tabs, sections, toggle, slider, button, input, dropdown,
+  colour swatches, toasts) written against the same call surface. If the Linoria
+  fetch fails or returns something unexpected, `src/ui_fallback.lua` builds the
+  hub with it instead of dying. Only one extra network call exists in the whole
+  bundle — `Library.lua` — and it fails over rather than hanging the menu empty.
 - **Client-side only.** `WalkSpeed`, `Fly`, `NoClip` and `ESP` are local
   changes. Any game that authoritatively validates movement will snap you back
   or flag it. There is no anti-cheat bypass in this repo and none is planned.

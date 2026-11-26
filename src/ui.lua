@@ -1,5 +1,5 @@
--- ui.lua — window built on the bundled interface module. Requires the feature
--- modules before it runs.
+-- ui.lua — Linoria front-end. Falls back to the bundled window if Linoria
+-- cannot be fetched or does not return a usable library.
 local Config = __require("config")
 local Util = __require("util")
 local Player = __require("features/player")
@@ -7,410 +7,393 @@ local ESP = __require("features/esp")
 local Teleport = __require("features/teleport")
 local Misc = __require("features/misc")
 
-local UI = {}
+local UI = { backend = "none" }
 
-local Rayfield
-local window
-local elements = {}
-local loaded = false
+local LINORIA_REPO = "https://raw.githubusercontent.com/wally-rblx/LinoriaLib/main/"
 
-local function notify(title, content)
-	if loaded and Rayfield then
+local Library
+local Options
+local fallback
+
+local function notify(text, duration)
+	if Library and type(Library.Notify) == "function" then
 		pcall(function()
-			Rayfield:Notify({ Title = title, Content = content, Duration = 4 })
+			Library:Notify(tostring(text), duration or 4)
 		end)
-	else
-		Util.notify(title, content)
+		return
 	end
+	Util.notify("OJB Test Hub", text)
 end
 
-local function report(result, okMessage)
-	local ok, message = result
+local function report(ok, message, okText)
 	if ok then
-		if okMessage then
-			notify("Success", message or okMessage)
-		end
-		return true
+		notify(message or okText or "done")
+	else
+		notify("Failed: " .. tostring(message))
 	end
-	notify("Failed", tostring(message or "unknown error"))
-	return false
+	return ok
 end
 
-local function loadRayfield()
-	-- Bundled window library: same call surface the UI was written against,
-	-- no network fetch, nothing to be blocked by an executor's domain rules.
-	return __require("interface")
+local function loadLibrary()
+	local source = game:HttpGet(LINORIA_REPO .. "Library.lua")
+	local chunk = loadstring(source)
+	if type(chunk) ~= "function" then
+		error("LinoriaLib/Library.lua did not compile")
+	end
+	local library = chunk()
+	if type(library) ~= "table" or type(library.CreateWindow) ~= "function" then
+		error("Linoria returned an unexpected library shape")
+	end
+	return library
 end
 
-local function buildPlayerTab(Rayfield, tab)
-	tab:CreateSection("Movement")
+local function buildLinoria()
+	Library = loadLibrary()
+	Options = (getgenv and getgenv().Options) or Options
 
-	elements.WalkSpeed = tab:CreateSlider({
-		Name = "Walk Speed",
-		Range = { 8, 300 },
-		Increment = 1,
-		Suffix = "studs/s",
-		CurrentValue = Config.get("WalkSpeed"),
-		Flag = "WalkSpeed",
+	local window = Library:CreateWindow({
+		Title = "OJB Test Hub",
+		Center = true,
+		AutoShow = true,
+	})
+
+	local tabs = {
+		Main = window:AddTab("Main"),
+		Visuals = window:AddTab("Visuals"),
+		Teleport = window:AddTab("Teleport"),
+		Config = window:AddTab("Config"),
+	}
+
+	-- Main / movement
+	local movement = tabs.Main:AddLeftGroupbox("Movement")
+
+	movement:AddSlider("WalkSpeed", {
+		Text = "Walk speed",
+		Default = Config.get("WalkSpeed"),
+		Min = 8,
+		Max = 300,
+		Rounding = 0,
+		Suffix = " studs/s",
 		Callback = function(value)
 			Player.setWalkSpeed(value)
 		end,
 	})
 
-	elements.JumpPower = tab:CreateSlider({
-		Name = "Jump Power",
-		Range = { 50, 500 },
-		Increment = 1,
-		Suffix = "power",
-		CurrentValue = Config.get("JumpPower"),
-		Flag = "JumpPower",
+	movement:AddSlider("JumpPower", {
+		Text = "Jump power",
+		Default = Config.get("JumpPower"),
+		Min = 50,
+		Max = 500,
+		Rounding = 0,
 		Callback = function(value)
 			Player.setJumpPower(value)
 		end,
 	})
 
-	tab:CreateSection("Flight")
-
-	elements.Fly = tab:CreateToggle({
-		Name = "Fly (WASD + Space/Ctrl)",
-		CurrentValue = Config.get("Fly"),
-		Flag = "Fly",
-		Callback = function(value)
-			Config.set("Fly", value)
-			local ok, message = Player.setFly(value)
-			if not ok then
-				notify("Fly", tostring(message))
-			end
-		end,
-	})
-
-	elements.FlySpeed = tab:CreateSlider({
-		Name = "Fly Speed",
-		Range = { 10, 300 },
-		Increment = 1,
-		Suffix = "studs/s",
-		CurrentValue = Config.get("FlySpeed"),
-		Flag = "FlySpeed",
+	movement:AddSlider("FlySpeed", {
+		Text = "Fly speed",
+		Default = Config.get("FlySpeed"),
+		Min = 10,
+		Max = 300,
+		Rounding = 0,
+		Suffix = " studs/s",
 		Callback = function(value)
 			Config.set("FlySpeed", value)
 		end,
 	})
 
-	tab:CreateSection("Collision")
+	movement:AddToggle("Fly", {
+		Text = "Fly",
+		Tooltip = "WASD to move, Space up, LeftControl down",
+		Default = Config.get("Fly"),
+		Callback = function(value)
+			Config.set("Fly", value)
+			local ok, message = Player.setFly(value)
+			if not ok then
+				notify("Fly: " .. tostring(message))
+			end
+		end,
+	})
 
-	elements.NoClip = tab:CreateToggle({
-		Name = "NoClip",
-		CurrentValue = Config.get("NoClip"),
-		Flag = "NoClip",
+	movement:AddToggle("NoClip", {
+		Text = "NoClip",
+		Default = Config.get("NoClip"),
 		Callback = function(value)
 			Config.set("NoClip", value)
 			Player.setNoClip(value)
 		end,
 	})
 
-	elements.InfiniteJump = tab:CreateToggle({
-		Name = "Infinite Jump",
-		CurrentValue = Config.get("InfiniteJump"),
-		Flag = "InfiniteJump",
+	movement:AddToggle("InfiniteJump", {
+		Text = "Infinite jump",
+		Default = Config.get("InfiniteJump"),
 		Callback = function(value)
 			Config.set("InfiniteJump", value)
 			Player.setInfiniteJump(value)
 		end,
 	})
 
-	tab:CreateButton({
-		Name = "Reset Character",
-		Callback = function()
+	-- Main / character
+	local character = tabs.Main:AddRightGroupbox("Character")
+
+	character:AddButton({
+		Text = "Reset character",
+		Func = function()
 			report(Player.resetCharacter(), "character reset")
 		end,
 	})
-end
 
-local function buildVisualsTab(Rayfield, tab)
-	tab:CreateSection("Players")
-
-	elements.ESP = tab:CreateToggle({
-		Name = "Player ESP",
-		CurrentValue = Config.get("ESP"),
-		Flag = "ESP",
-		Callback = function(value)
-			Config.set("ESP", value)
-			ESP.setEnabled(value)
-		end,
-	})
-
-	elements.ESPColor = tab:CreateColorPicker({
-		Name = "ESP Color",
-		Color = Color3.fromRGB(120, 180, 255),
-		Flag = "ESPColor",
-		Callback = function(color)
-			ESP.setColor(color)
-		end,
-	})
-
-	tab:CreateSection("Lighting")
-
-	elements.Fullbright = tab:CreateToggle({
-		Name = "Fullbright",
-		CurrentValue = Config.get("Fullbright"),
-		Flag = "Fullbright",
-		Callback = function(value)
-			Config.set("Fullbright", value)
-			Misc.setFullbright(value)
-		end,
-	})
-end
-
-local function buildTeleportTab(Rayfield, tab)
-	tab:CreateSection("Waypoints")
-
-	elements.WaypointName = tab:CreateInput({
-		Name = "Waypoint Name",
-		CurrentValue = "",
-		PlaceholderText = "spawn",
-		RemoveTextAfterFocusLost = false,
-		Flag = "WaypointName",
-		Callback = function()
-		end,
-	})
-
-	tab:CreateButton({
-		Name = "Save Waypoint Here",
-		Callback = function()
-			local name = elements.WaypointName and elements.WaypointName.CurrentValue or ""
-			local ok, result = Teleport.saveWaypoint(name)
-			if ok then
-				local names = Teleport.waypointNames()
-				if elements.Waypoints then
-					elements.Waypoints:Refresh((#names > 0) and names or { "(empty)" })
-				end
-				notify("Waypoint", ("saved \"%s\""):format(result))
-			else
-				notify("Waypoint", tostring(result))
-			end
-		end,
-	})
-
-	local waypointNames = Teleport.waypointNames()
-	elements.Waypoints = tab:CreateDropdown({
-		Name = "Saved Waypoints",
-		Options = (#waypointNames > 0) and waypointNames or { "(empty)" },
-		CurrentOption = {},
-		MultipleOptions = false,
-		Flag = "Waypoints",
-		Callback = function()
-		end,
-	})
-
-	tab:CreateButton({
-		Name = "Teleport To Waypoint",
-		Callback = function()
-			local selected = elements.Waypoints and elements.Waypoints.CurrentOption or {}
-			local name = selected[1]
-			if not name or name == "(empty)" then
-				notify("Teleport", "pick a waypoint first")
-				return
-			end
-			report(Teleport.toWaypoint(name))
-		end,
-	})
-
-	tab:CreateSection("Players")
-
-	local playerNames = Teleport.playerNames()
-	elements.Players = tab:CreateDropdown({
-		Name = "Player",
-		Options = (#playerNames > 0) and playerNames or { "(empty)" },
-		CurrentOption = {},
-		MultipleOptions = false,
-		Flag = "Players",
-		Callback = function()
-		end,
-	})
-
-	tab:CreateButton({
-		Name = "Teleport To Player",
-		Callback = function()
-			local selected = elements.Players and elements.Players.CurrentOption or {}
-			local name = selected[1]
-			if not name or name == "(empty)" then
-				notify("Teleport", "pick a player first")
-				return
-			end
-			report(Teleport.toPlayer(name))
-		end,
-	})
-
-	tab:CreateButton({
-		Name = "Refresh Player List",
-		Callback = function()
-			local names = Teleport.playerNames()
-			if elements.Players then
-				elements.Players:Refresh(names)
-			end
-			notify("Players", ("%d in server"):format(#names))
-		end,
-	})
-end
-
-local function buildMiscTab(Rayfield, tab)
-	tab:CreateSection("Session")
-
-	elements.AntiAFK = tab:CreateToggle({
-		Name = "Anti-AFK",
-		CurrentValue = Config.get("AntiAFK"),
-		Flag = "AntiAFK",
+	character:AddToggle("AntiAFK", {
+		Text = "Anti-AFK",
+		Default = Config.get("AntiAFK"),
 		Callback = function(value)
 			Config.set("AntiAFK", value)
 			Misc.setAntiAFK(value)
 		end,
 	})
 
-	tab:CreateButton({
-		Name = "Rejoin Server",
-		Callback = function()
-			notify("Rejoin", "teleporting")
-			task.wait(0.6)
+	character:AddButton({
+		Text = "Rejoin server",
+		Func = function()
+			notify("Rejoining...")
+			task.wait(0.5)
 			Misc.rejoin()
 		end,
 	})
 
-	tab:CreateSection("Diagnostics")
+	-- Visuals
+	local players = tabs.Visuals:AddLeftGroupbox("Players")
 
-	tab:CreateButton({
-		Name = "Test Notification",
-		Callback = function()
-			notify("Test", "notification pipeline is live")
+	players:AddToggle("ESP", {
+		Text = "Player ESP",
+		Default = Config.get("ESP"),
+		Callback = function(value)
+			Config.set("ESP", value)
+			ESP.setEnabled(value)
 		end,
 	})
 
-	tab:CreateButton({
-		Name = "Destroy UI",
-		Callback = function()
-			UI.destroy()
-		end,
-	})
-end
-
-local function buildConfigTab(Rayfield, tab)
-	tab:CreateButton({
-		Name = "Save Settings",
-		Callback = function()
-			notify("Config", select(2, Config.save()) or "saved")
+	players:AddLabel("ESP color"):AddColorPicker("ESPColor", {
+		Default = Color3.fromRGB(120, 180, 255),
+		Title = "ESP color",
+		Callback = function(color)
+			ESP.setColor(color)
 		end,
 	})
 
-	tab:CreateButton({
-		Name = "Load Settings",
-		Callback = function()
+	local world = tabs.Visuals:AddRightGroupbox("World")
+
+	world:AddToggle("Fullbright", {
+		Text = "Fullbright",
+		Default = Config.get("Fullbright"),
+		Callback = function(value)
+			Config.set("Fullbright", value)
+			Misc.setFullbright(value)
+		end,
+	})
+
+	-- Teleport
+	local waypoints = tabs.Teleport:AddLeftGroupbox("Waypoints")
+
+	waypoints:AddInput("WaypointName", {
+		Text = "Waypoint name",
+		Default = "",
+		Placeholder = "spawn",
+		Finished = false,
+	})
+
+	local waypointNames = Teleport.waypointNames()
+
+	waypoints:AddDropdown("Waypoints", {
+		Text = "Saved waypoints",
+		Values = (#waypointNames > 0) and waypointNames or { "(empty)" },
+		Default = 1,
+		Multi = false,
+	})
+
+	waypoints:AddButton({
+		Text = "Save waypoint here",
+		Func = function()
+			local name = ""
+			if Options and Options.WaypointName then
+				name = tostring(Options.WaypointName.Value or "")
+			end
+			local ok, result = Teleport.saveWaypoint(name)
+			if not ok then
+				notify("Waypoint: " .. tostring(result))
+				return
+			end
+			local names = Teleport.waypointNames()
+			pcall(function()
+				Options.Waypoints:SetValues(names)
+			end)
+			notify(('Waypoint "%s" saved'):format(tostring(result)))
+		end,
+	})
+
+	waypoints:AddButton({
+		Text = "Teleport to waypoint",
+		Func = function()
+			local selected = Options and Options.Waypoints and Options.Waypoints.Value
+			if not selected or selected == "(empty)" then
+				notify("Pick a waypoint first")
+				return
+			end
+			report(Teleport.toWaypoint(selected), nil, "teleported")
+		end,
+	})
+
+	local targets = tabs.Teleport:AddRightGroupbox("Players")
+
+	targets:AddDropdown("TargetPlayer", {
+		Text = "Player",
+		SpecialType = "Player",
+		Multi = false,
+	})
+
+	targets:AddButton({
+		Text = "Teleport to player",
+		Func = function()
+			local selected = Options and Options.TargetPlayer and Options.TargetPlayer.Value
+			if not selected or selected == "" then
+				notify("Pick a player first")
+				return
+			end
+			report(Teleport.toPlayer(selected), nil, "teleported")
+		end,
+	})
+
+	targets:AddButton({
+		Text = "Refresh player list",
+		Func = function()
+			local names = Teleport.playerNames()
+			pcall(function()
+				Options.TargetPlayer:SetValues(names)
+			end)
+			notify(("%d other players"):format(#names))
+		end,
+	})
+
+	-- Config
+	local settings = tabs.Config:AddLeftGroupbox("Settings")
+
+	settings:AddButton({
+		Text = "Save settings",
+		Func = function()
+			local ok, message = Config.save()
+			report(ok, message, "saved")
+		end,
+	})
+
+	settings:AddButton({
+		Text = "Load settings",
+		Func = function()
 			local ok, message = Config.load()
-			notify("Config", tostring(message))
 			if ok then
 				UI.sync()
 			end
+			report(ok, message, "loaded")
 		end,
 	})
+
+	settings:AddButton({
+		Text = "Unload",
+		Func = function()
+			UI.destroy()
+		end,
+	})
+
+	local menu = tabs.Config:AddRightGroupbox("Menu")
+
+	menu:AddLabel("Menu keybind"):AddKeyPicker("MenuKeybind", {
+		Default = "K",
+		NoUI = true,
+		Text = "Menu keybind",
+	})
+
+	Library.ToggleKeybind = Options and Options.MenuKeybind
+
+	Library:OnUnload(function()
+		pcall(function()
+			Player.destroy()
+			ESP.destroy()
+			Misc.destroy()
+		end)
+	end)
+
+	UI.backend = "linoria"
+	UI.sync()
+	notify("OJB Test Hub loaded — Linoria")
 end
 
--- Push the current config into live features and into the UI elements.
 function UI.sync()
-	if elements.WalkSpeed then
-		elements.WalkSpeed:Set(Config.get("WalkSpeed"))
+	if UI.backend == "fallback" and fallback then
+		return fallback.sync()
 	end
-	if elements.JumpPower then
-		elements.JumpPower:Set(Config.get("JumpPower"))
-	end
-	if elements.FlySpeed then
-		elements.FlySpeed:Set(Config.get("FlySpeed"))
+
+	if Options then
+		pcall(function()
+			Options.WalkSpeed:SetValue(Config.get("WalkSpeed"))
+			Options.JumpPower:SetValue(Config.get("JumpPower"))
+			Options.FlySpeed:SetValue(Config.get("FlySpeed"))
+			Options.Fly:SetValue(Config.get("Fly"))
+			Options.NoClip:SetValue(Config.get("NoClip"))
+			Options.InfiniteJump:SetValue(Config.get("InfiniteJump"))
+			Options.ESP:SetValue(Config.get("ESP"))
+			Options.Fullbright:SetValue(Config.get("Fullbright"))
+			Options.AntiAFK:SetValue(Config.get("AntiAFK"))
+		end)
 	end
 
 	Player.setWalkSpeed(Config.get("WalkSpeed"))
 	Player.setJumpPower(Config.get("JumpPower"))
-
-	if Config.get("Fly") then
-		Player.setFly(true)
-	else
-		Player.setFly(false)
-	end
-	if elements.Fly then
-		elements.Fly:Set(Config.get("Fly"))
-	end
-
+	Player.setFly(Config.get("Fly"))
 	Player.setNoClip(Config.get("NoClip"))
-	if elements.NoClip then
-		elements.NoClip:Set(Config.get("NoClip"))
-	end
-
 	Player.setInfiniteJump(Config.get("InfiniteJump"))
-	if elements.InfiniteJump then
-		elements.InfiniteJump:Set(Config.get("InfiniteJump"))
-	end
-
 	ESP.setEnabled(Config.get("ESP"))
-	if elements.ESP then
-		elements.ESP:Set(Config.get("ESP"))
-	end
-
 	Misc.setFullbright(Config.get("Fullbright"))
-	if elements.Fullbright then
-		elements.Fullbright:Set(Config.get("Fullbright"))
-	end
-
 	Misc.setAntiAFK(Config.get("AntiAFK"))
-	if elements.AntiAFK then
-		elements.AntiAFK:Set(Config.get("AntiAFK"))
-	end
 end
 
 function UI.build()
-	if window then
-		return window
+	local ok, err = pcall(buildLinoria)
+	if ok then
+		return
 	end
 
-	Rayfield = loadRayfield()
-	loaded = true
+	-- Linoria unreachable: the bundled window still has to work.
+	fallback = __require("ui_fallback")
+	UI.backend = "fallback"
 
-	Util.setNotifier(function(title, content)
-		notify(title, content)
-	end)
+	local built, fallbackError = pcall(fallback.build)
+	if not built then
+		Util.showError(
+			"OJB Test Hub — no window could be built",
+			("linoria: %s\nfallback: %s"):format(tostring(err), tostring(fallbackError))
+		)
+		error(fallbackError)
+	end
 
-	window = Rayfield:CreateWindow({
-		Name = "OJB Test Hub",
-		Icon = 0,
-		LoadingTitle = "OJB Test Hub",
-		LoadingSubtitle = "loadstring test build",
-		Theme = "Default",
-		ToggleUIKeybind = "K",
-		DisableRayfieldPrompts = true,
-	})
-
-	-- No icon strings: Rayfield's Lucide set is a compiled subset, and an
-	-- unknown name aborts the whole build. Plain text tabs always work.
-	buildPlayerTab(Rayfield, window:CreateTab("Player"))
-	buildVisualsTab(Rayfield, window:CreateTab("Visuals"))
-	buildTeleportTab(Rayfield, window:CreateTab("Teleport"))
-	buildMiscTab(Rayfield, window:CreateTab("Misc"))
-	buildConfigTab(Rayfield, window:CreateTab("Config"))
-
-	UI.sync()
-	notify("OJB Test Hub", "loaded — press K to toggle")
-	return window
+	notify("Linoria unavailable (" .. tostring(err) .. ") — using bundled window")
 end
 
 function UI.destroy()
+	if Library then
+		pcall(function()
+			Library:Unload()
+		end)
+		Library = nil
+	end
+	if fallback then
+		pcall(fallback.destroy)
+		fallback = nil
+	end
 	pcall(function()
 		Player.destroy()
 		ESP.destroy()
 		Misc.destroy()
 	end)
-	if window then
-		pcall(function()
-			window:Destroy()
-		end)
-		window = nil
-	end
-	elements = {}
-	loaded = false
+	UI.backend = "none"
 	Util.notify("OJB Test Hub", "unloaded")
 end
 

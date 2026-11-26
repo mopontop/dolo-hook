@@ -26,6 +26,7 @@ ORDER = [
     "features/teleport",
     "features/misc",
     "interface",
+    "ui_fallback",
     "ui",
     "init",
 ]
